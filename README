@@ -1,0 +1,7 @@
+osgpcl
+by Adam Stambler
+Carnegie Mellon University
+
+OpenSceneGraph Point Cloud Library
+
+These are a set of utilty functions for using PCL with open scene graph.
