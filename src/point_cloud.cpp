@@ -49,6 +49,17 @@ namespace osgPCL
   {
   }
 
+  void
+  osgPCL::PointCloud::setPointColor(double r, double g, double b){
+    uniform_color_[0]=r; uniform_color_[1]=g; uniform_color_[2]=b;
+    osg::StateSet* sset = getOrCreateStateSet();
+    if ( sset->getUniform("color") != NULL ){
+      sset->setAttribute(shader_programs_["UniformColor"]);
+      osg::Uniform* ucolor = sset->getUniform("color");
+      ucolor->set(uniform_color_);
+      ucolor->dirty();
+    }
+  }
 
   void
  osgPCL::PointCloud::setInputCloud(const pcl::PointCloud<pcl::PointXYZ>& cloud){

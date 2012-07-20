@@ -30,9 +30,6 @@ namespace osgPCL
     ~PointCloud ();
 
 
-    //Enables the solid color shader and sets the uniform color as
-    //this RGB Value
-    void setPointColor(double r, double g, double b);
 
     //Color
     void setInputCloud( const pcl::PointCloud<pcl::PointXYZ>& cloud);
@@ -42,7 +39,10 @@ namespace osgPCL
     static std::map<std::string, osg::Program*> shader_programs_;
 
     osg::Vec4 uniform_color_;
-
+public:
+    //Enables the solid color shader and sets the uniform color as
+    //this RGB Value
+    void setPointColor(double r, double g, double b);
 
   };
 
