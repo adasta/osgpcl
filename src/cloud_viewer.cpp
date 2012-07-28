@@ -219,7 +219,6 @@ PickHandler::select(osg::View* view, osgViewer::ViewerBase* viewer){
   }
 
   osg::Polytope::PlaneList pl;
-  pl.pu
 
   polytope.setReferenceVertexList(vertices);
 
@@ -277,9 +276,9 @@ int main(int argc, char** argv){
      return 1;
  }
 
- pcl::PointCloud<pcl::PointXYZ> cloud;
+ pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
 
- if ( pcl::io::loadPCDFile(infile, cloud) <0 )return -1;
+ if ( pcl::io::loadPCDFile(infile, *cloud) <0 )return -1;
 
 
  osgViewer::Viewer viewer;
@@ -287,11 +286,12 @@ int main(int argc, char** argv){
 
  osg::Geode* geode = new osg::Geode;
 
- osgPCL::PointCloud* cren = new osgPCL::PointCloud;
- cren->setPointColor(0,1,0.25);
+ osgPCL::PointCloudColoredFactory<pcl::PointXYZ> cfactory;
 
- cren->setInputCloud(cloud);
- geode->addDrawable(cren);
+ cfactory.setInputCloud<pcl::PointXYZ>(cloud);
+
+
+ geode->addDrawable(cfactory.buildGeometry());
  geode->setDataVariance(osg::Node::STATIC);
 
  osg::Group* root = new osg::Group;
