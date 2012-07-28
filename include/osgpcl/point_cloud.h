@@ -74,8 +74,9 @@ namespace osgPCL
   template<typename PointTXYZ=pcl::PointXYZ, typename PointTF=pcl::PointXYZ>
   class PointCloudCRangeFactory : public PointCloudFactory {
 
-
     public:
+
+    PointCloudCRangeFactory();
       typedef boost::shared_ptr<typename pcl::PointCloud<PointTXYZ>::ConstPtr > CloudConstPtr;
 
     void setField(std::string field);
@@ -102,7 +103,6 @@ namespace osgPCL
     virtual PointCloudGeometry* buildGeometry(bool unique_stateset=false) const;
 
   };
-
 
   template<typename PointTXYZ, typename IntensityT>
   class PointCloudIFactory : public PointCloudFactory {

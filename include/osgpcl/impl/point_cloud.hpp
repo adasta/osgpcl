@@ -13,23 +13,32 @@
 #include <pcl/console/print.h>
 #include <osg/Point>
 
+#include <pcl/point_traits.h>
+#include <pcl/common/concatenate.h>
+#include <pcl/ros/conversions.h>
+#include <pcl/common/common.h>
 
   template<typename PointT>
   inline typename pcl::PointCloud<PointT>::ConstPtr osgPCL::PointCloudFactory::getInputCloud () const
   {
-    typename pcl::PointCloud<PointT>::ConstPtr cloud;
-    std::string key =pcl::getFieldsList(*cloud);
+
+    std::string key;    // Get the fields list
+    {
+      pcl::PointCloud<PointT> cloud;
+      key = pcl::getFieldsList(cloud);
+    }
+
     std::map<std::string, boost::any>::const_iterator iter= input_clouds_.find(key);
 
     if (iter == input_clouds_.end()){
+      pcl::console::print_error("PointCloudFactory trying to retrieve input %s that does not exist\n", key.c_str());
       return typename pcl::PointCloud<PointT>::ConstPtr();
     }
     try{
-      cloud = boost::any_cast< typename pcl::PointCloud<PointT>::ConstPtr>(*iter);
-      return cloud;
+      return boost::any_cast< typename pcl::PointCloud<PointT>::ConstPtr>(iter->second);
     }
-    catch(boost::exception& e){
-      pcl::console::print_error("PointCloudFactory trying to retrieve input %s that does not exist", key.c_str());
+    catch(boost::bad_any_cast& e){
+      pcl::console::print_error("PointCloudFactory Exception: %s\n", e.what());
       return typename pcl::PointCloud<PointT>::ConstPtr();
     }
 
@@ -136,44 +145,130 @@
   // ******************************* PointCloudCRange *************************
 
 
+  template<typename PointTXYZ , typename PointTF > inline
+  osgPCL::PointCloudCRangeFactory<PointTXYZ, PointTF>::PointCloudCRangeFactory () :
+    max_range_(-1), min_range_(-1)
+  {
+    color_table_.push_back(osg::Vec4(1,1,1,1));
+    color_table_.push_back(osg::Vec4(1,0,0,1));
+    stateset_ = new osg::StateSet;
+    setPointSize(4);
+    stateset_->setMode( GL_LIGHTING, osg::StateAttribute::OFF );
+  }
+
   template<typename PointTXYZ, typename PointTF>
   inline void osgPCL::PointCloudCRangeFactory<PointTXYZ, PointTF>::setField (
       std::string field)
   {
+    field_name_ =field;
   }
 
   template<typename PointTXYZ , typename PointTF>
   inline void osgPCL::PointCloudCRangeFactory<PointTXYZ, PointTF>::setRangle (
       double min, double max)
   {
+    min_range_ =min;
+    max_range_ = max;
   }
 
   template<typename PointTXYZ, typename PointTF >
   inline void osgPCL::PointCloudCRangeFactory<PointTXYZ, PointTF>::setColorTable (
       const std::vector<osg::Vec4>& table)
   {
+    color_table_ =table;
   }
 
   template<typename PointTXYZ , typename PointTF >
   inline void osgPCL::PointCloudCRangeFactory<PointTXYZ, PointTF>::useJETColorTable ()
   {
+    //TODO
   }
 
   template<typename PointTXYZ , typename PointTF>
   inline void osgPCL::PointCloudCRangeFactory<PointTXYZ, PointTF>::useGreyColorTable ()
   {
+    //TODO
   }
 
   template<typename PointTXYZ, typename PointTF>
   inline osgPCL::PointCloudGeometry* osgPCL::PointCloudCRangeFactory<PointTXYZ, PointTF>::buildGeometry (
       bool unique_stateset) const
   {
+
+    typename pcl::PointCloud<PointTXYZ>::ConstPtr xyz = getInputCloud<PointTXYZ>();
+    typename pcl::PointCloud<PointTF>::ConstPtr fcloud = getInputCloud<PointTF>();
+    if  ( (fcloud == NULL) || (xyz==NULL) ){
+      return NULL;
+    }
+    double minr, maxr;
+
+    std::vector<sensor_msgs::PointField> flist;
+    pcl::getFields<PointTF>(*fcloud, flist);
+
+   int idx=-1;
+   for(int i=0; i< flist.size(); i++){
+     if (flist[i].name==field_name_) idx=i;
+   }
+
+   if (idx <0 ){
+     pcl::console::print_debug("[PointCloudCRangefactory] Pointfield ( %s )does not exist\n", field_name_.c_str());
+     return NULL;
+   }
+   int offset =flist[idx].offset;
+
+   if ( fabs(min_range_-max_range_) <0.001){
+      minr = std::numeric_limits<double>::infinity();
+      maxr = -std::numeric_limits<double>::infinity();
+      for(int i=0; i< fcloud->points.size(); i++){
+        double val = *( (float*) (  ( (uint8_t* ) &fcloud->points[i] )  + offset ) );
+        if (val < minr) minr = val;
+        if (val > maxr) maxr = val;
+      }
+    }
+    else{
+      minr = min_range_;
+      maxr = max_range_;
+    }
+    double scale = (color_table_.size()-1)/(maxr-minr);
+    int maxidx= color_table_.size()-1;
+
+    osg::Vec4Array* colors = new osg::Vec4Array;
+    colors->resize(fcloud->points.size());
+    for(int i=0; i< fcloud->points.size(); i++){
+     double val = *( (float*) (  ( (uint8_t* ) &fcloud->points[i] )  + offset ) );
+     double idx = (val-minr)*scale;
+     if (idx <0) idx=0;
+     if (idx> maxidx)  idx =maxidx;
+     double wl = idx-std::floor(idx);
+     double wu = 1-wl;
+     const osg::Vec4f& lpt = color_table_[std::floor(idx)];
+     const osg::Vec4f& upt = color_table_[std::ceil(idx)];
+     for(int j=0; j<4; j++) (*colors)[i][j] = lpt[j]*wl+ upt[j]*wu;
+    }
+
+    PointCloudGeometry* geom = new PointCloudGeometry;
+
+    this->addXYZToVertexBuffer<PointTXYZ>(*geom, *xyz);
+
+    geom->setColorArray(colors);
+    geom->setColorBinding(osg::Geometry::BIND_PER_VERTEX);
+
+    if (unique_stateset){
+      geom->setStateSet(new osg::StateSet(*stateset_));
+    }
+    else{
+      geom->setStateSet(stateset_);
+    }
+    return geom;
   }
 
   template<typename PointTXYZ , typename PointTF >
   inline void osgPCL::PointCloudCRangeFactory<PointTXYZ, PointTF>::setPointSize (
       int size)
   {
+    osg::Point* p = new osg::Point();
+    p->setSize(4);
+    stateset_->setAttribute(p);
   }
 
   template<typename PointTXYZ, typename IntensityT>

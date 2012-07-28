@@ -286,10 +286,10 @@ int main(int argc, char** argv){
 
  osg::Geode* geode = new osg::Geode;
 
- osgPCL::PointCloudColoredFactory<pcl::PointXYZ> cfactory;
-
+ osgPCL::PointCloudCRangeFactory<>   cfactory;
+ //osgPCL::PointCloudColoredFactory<> cfactory;
  cfactory.setInputCloud<pcl::PointXYZ>(cloud);
-
+cfactory.setField("z");
 
  geode->addDrawable(cfactory.buildGeometry());
  geode->setDataVariance(osg::Node::STATIC);
