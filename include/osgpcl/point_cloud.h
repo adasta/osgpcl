@@ -18,6 +18,9 @@
 #include <string>
 #include <map>
 #include <pcl/common/io.h>
+
+#include <sensor_msgs/PointCloud2.h>
+
 namespace osgPCL
 {
 
@@ -29,12 +32,13 @@ namespace osgPCL
 
   typedef osg::Geometry PointCloudGeometry;
 
-  class PointCloudFactory {
+  class PointCloudFactory :  public osg::Referenced {
     public:
       PointCloudFactory(){}
       virtual ~PointCloudFactory(){}
 
       virtual PointCloudGeometry* buildGeometry(bool unique_stateset=false) const =0;
+
     private:
       std::map<std::string, boost::any> input_clouds_;
 
@@ -43,6 +47,9 @@ namespace osgPCL
       void setInputCloud(const typename pcl::PointCloud<PointT>::ConstPtr& cloud ){
         input_clouds_[pcl::getFieldsList(*cloud)] = cloud;
       }
+
+      virtual void setInputCloud(const sensor_msgs::PointCloud2::ConstPtr& cloud)=0;
+      void clearInput(){input_clouds_.clear();}
 
     protected:
       osg::ref_ptr<osg::StateSet> stateset_;
@@ -64,6 +71,8 @@ namespace osgPCL
 
     virtual PointCloudGeometry* buildGeometry(bool unique_stateset=false) const;
 
+    using PointCloudFactory::setInputCloud;
+    virtual void setInputCloud(const sensor_msgs::PointCloud2::ConstPtr& cloud);
 
       void setColor(float r, float g, float b, float alpha =1);
 
@@ -87,8 +96,9 @@ namespace osgPCL
     void useGreyColorTable();
 
     virtual PointCloudGeometry* buildGeometry(bool unique_stateset=false) const;
-
     void setPointSize(int size);
+    virtual void setInputCloud(const sensor_msgs::PointCloud2::ConstPtr& cloud);
+    using PointCloudFactory::setInputCloud;
 
     protected:
       std::string field_name_;
@@ -98,16 +108,19 @@ namespace osgPCL
 
   template<typename PointTXYZ=pcl::PointXYZ, typename RGBT=pcl::RGB>
   class PointCloudRGBFactory : public PointCloudFactory {
-
     public:
     virtual PointCloudGeometry* buildGeometry(bool unique_stateset=false) const;
+    virtual void setInputCloud(const sensor_msgs::PointCloud2::ConstPtr& cloud);
+    using PointCloudFactory::setInputCloud;
 
   };
 
   template<typename PointTXYZ, typename IntensityT>
   class PointCloudIFactory : public PointCloudFactory {
-
-    virtual PointCloudGeometry* buildGeometry() const;
+    public:
+      virtual PointCloudGeometry* buildGeometry() const;
+      virtual void setInputCloud(const sensor_msgs::PointCloud2::ConstPtr& cloud);
+      using PointCloudFactory::setInputCloud;
 
   };
 

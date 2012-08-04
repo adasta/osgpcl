@@ -13,8 +13,8 @@ include_directories( include)
 set(CMAKE_BUILD_TYPE "DEBUG")
 ######################### External Libraries ###########################
 	
-find_package(PCL 1.6 REQUIRED COMPONENTS 
-			io octree filters search kdtree registration
+find_package(PCL 1.7 REQUIRED COMPONENTS 
+			io octree filters search kdtree registration outofcore
 			segmentation features surface visualization)
 include_directories(${PCL_INCLUDE_DIRS})
 link_directories(${PCL_LIBRARY_DIRS})
@@ -42,11 +42,20 @@ ${Boost_LIBRARIES}
 ######################## Executables / Libraries ######################
 
 
-add_library(osgpcl src/point_cloud.cpp)
+add_library(osgpcl src/point_cloud.cpp )
 target_link_libraries(osgpcl ${OSGPCL_DEP_LIBRARIES})
 
+add_library(osgdb_pcd src/point_cloud_reader.cpp)
+target_link_libraries(osgdb_pcd ${OSGPCL_DEP_LIBRARIES} osgpcl)
+
 add_executable(cloud_viewer src/cloud_viewer.cpp)
-target_link_libraries(cloud_viewer osgpcl ${OSGPCL_DEP_LIBRARIES})
+target_link_libraries(cloud_viewer osgpcl ${OSGPCL_DEP_LIBRARIES} osgdb_pcd)
+
+add_executable(oc_viewer src/oc_viewer.cpp)
+target_link_libraries(oc_viewer osgpcl ${OSGPCL_DEP_LIBRARIES} osgdb_pcd)
+
+add_executable(outofcore_generator src/outofcore_generator.cpp)
+target_link_libraries(outofcore_generator  ${PCL_LIBRARIES})
 
 #add a directory for throw away programs for testing out code
 if( IS_DIRECTORY "${CMAKE_SOURCE_DIR}/scratch")

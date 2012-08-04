@@ -17,6 +17,10 @@
 #include <osgGA/GUIEventHandler>
 #include <osgGA/GUIActionAdapter>
 
+#include <osgpcl/point_cloud_reader.h>
+#include <osgDB/ReadFile>
+#include <osgDB/Registry>
+
 namespace po=boost::program_options;
 
 
@@ -283,7 +287,7 @@ int main(int argc, char** argv){
 
  osgViewer::Viewer viewer;
  viewer.setUpViewInWindow(0,0,500,500,0);
-
+/*
  osg::Geode* geode = new osg::Geode;
 
  osgPCL::PointCloudCRangeFactory<>   cfactory;
@@ -298,7 +302,13 @@ cfactory.setField("z");
  root->addChild(geode);
  viewer.setSceneData( root);
  viewer.addEventHandler(new PickHandler);
+*/
 
+osgPCL::PointCloudReader::CloudLoadingOptions options;
+options.factory = new osgPCL::PointCloudColoredFactory<>;
+
+osgDB::Registry::instance()->addReaderWriter(new osgPCL::PointCloudReader);
+ viewer.setSceneData( osgDB::readNodeFile(infile,&options));
 viewer.getCamera()->setClearColor( osg::Vec4(0,0,0,1));
 return viewer.run();
 
