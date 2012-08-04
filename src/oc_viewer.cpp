@@ -26,12 +26,19 @@ typedef Eigen::aligned_allocator<PointT> AlignedPointT;
 #include <pcl/filters/passthrough.h>
 #include <pcl/filters/conditional_removal.h>
 
+#include <osgpcl/outofcore_octree_reader.h>
 
+
+#include <osgDB/ReadFile>
+#include <osgDB/Registry>
 
 int main(int argc, char** argv){
 
-  std::string tree_root;
+  std::string tree_root =argv[1] ;
+  double sample = atof(argv[2]);
+  int depth = atoi(argv[3]);
 
+  /*
   octree_disk octree (argv[1], false);
 
 
@@ -44,8 +51,6 @@ int main(int argc, char** argv){
   pcl::PointCloud<pcl::PointXYZ>::Ptr  pcloud(new   pcl::PointCloud<pcl::PointXYZ>);
   pcl::PointCloud<pcl::PointXYZ>::Ptr  ccloud(new   pcl::PointCloud<pcl::PointXYZ>);
 
-  double sample = atof(argv[2]);
-  int depth = atoi(argv[3]);
 
  std::cout << "Coord system is " <<  octree.getCoordSystem() << " \n";
 
@@ -77,8 +82,6 @@ int main(int argc, char** argv){
   }
 
   std::cout << " \n";
-  osgViewer::Viewer viewer;
-  viewer.setUpViewInWindow(0,0,500,500,0);
 
   osg::Geode* geode = new osg::Geode;
 
@@ -91,7 +94,12 @@ int main(int argc, char** argv){
 
   osg::Group* root = new osg::Group;
   root->addChild(geode);
-  viewer.setSceneData( root);
+  */
+  osgViewer::Viewer viewer;
+  viewer.setUpViewInWindow(0,0,500,500,0);
+
+
+  viewer.setSceneData( osgDB::readNodeFile(tree_root));
 
  viewer.getCamera()->setClearColor( osg::Vec4(0,0,0,1));
  return viewer.run();
