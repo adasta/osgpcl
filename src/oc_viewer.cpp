@@ -41,7 +41,7 @@ int main(int argc, char** argv){
 
   osg::ref_ptr< osgPCL::PointCloudCRangeFactory<> >   cfactory(new osgPCL::PointCloudCRangeFactory<>);
   cfactory->setField("z");
-
+  cfactory->setRangle(1000,1100);
 
   osgPCL::OutofCoreOctreeReader::OutOfCoreOptions* options = new osgPCL::OutofCoreOctreeReader::OutOfCoreOptions(cfactory,0.1);
 

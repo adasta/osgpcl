@@ -317,7 +317,6 @@ inline void osgPCL::PointCloudCRangeFactory<PointTXYZ, PointTF>::setInputCloud (
   pcl::fromROSMsg(*cloud,*xyz);
   PointCloudFactory::setInputCloud<PointTXYZ>(xyz);
 
-  for(int i=0; i<cloud->fields.size(); i++) std::cout << i << "  " << cloud->fields[i].name << "\n";
   if ( !boost::is_same<PointTXYZ, PointTF>::value){
     typename pcl::PointCloud<PointTF>::Ptr fcloud(new pcl::PointCloud<PointTF>);
     pcl::fromROSMsg(*cloud,*fcloud);

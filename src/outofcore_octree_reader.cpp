@@ -71,8 +71,6 @@ namespace osgPCL
       coptions->init( tree);
     }
 
-    std::cout << "Loading " << coptions->getDepth() ;
-    printBB(std::cout , *coptions);
 
     const osg::Vec3d & bbmin =coptions->getBBmin();
     const osg::Vec3d& bbmax =coptions->getBBmax();
@@ -85,7 +83,7 @@ namespace osgPCL
     osg::Vec3d center = (bbmax + bbmin)/2.0f ;
     lod->setCenter( center );
     lod->setRadius( radius );
-std::cout << coptions->getSampling() << " sampling \n";
+
     sensor_msgs::PointCloud2::Ptr cloud(new sensor_msgs::PointCloud2);
     if (coptions->getSampling() > 0.999){
       coptions->getOctree()->queryBBIncludes(coptions->getBBmin()._v, coptions->getBBmax()._v,coptions->getDepth(), cloud);
@@ -93,7 +91,6 @@ std::cout << coptions->getSampling() << " sampling \n";
     else{
       coptions->getOctree()->queryBBIncludes_subsample(coptions->getBBmin()._v, coptions->getBBmax()._v,coptions->getDepth(), coptions->getSampling(), cloud);
     }
-    std::cout << "There are " << cloud->width*cloud->height << " points \n";
 
     if (cloud->width*cloud->height == 0 ) return new osg::Node;
     coptions->getFactory()->setInputCloud(cloud);
@@ -103,7 +100,10 @@ std::cout << coptions->getSampling() << " sampling \n";
      lod->addChild(coptions->getFactory()->buildNode(), radius, FLT_MAX);
      }
     else{
-      lod->addChild(coptions->getFactory()->buildNode(), radius , radius*2);
+      if (coptions->getDepth() == coptions->getMaxDepth()){
+        lod->addChild(coptions->getFactory()->buildNode(), 0 , radius*3);
+      }
+      else  lod->addChild(coptions->getFactory()->buildNode(), radius , radius*3);
     }
     coptions->getFactory()->clearInput();
 
@@ -112,11 +112,6 @@ std::cout << coptions->getSampling() << " sampling \n";
         bbmin+ osg::Vec3d(0,sh[1],0), bbmin+ osg::Vec3d(0, sh[1], sh[2]),
         bbmin+ osg::Vec3d(sh[0], sh[1], sh[2]),  bbmin+osg::Vec3d(sh[0], 0 , sh[2]),
         bbmin+osg::Vec3d(0, 0, sh[2]);
-
-     std::cout << "Child minbbs are :\n";
-     for(int i=0; i<8;i++){
-       std::cout << minbbs[i][0] << "  " << minbbs[i][1] << "  " << minbbs[i][2] << " \n";
-     }
 
     float child_rad = sh.length();
      int cdepth = coptions->getDepth()+1;
@@ -130,13 +125,10 @@ std::cout << coptions->getSampling() << " sampling \n";
       osgDB::Options* opts = new osgDB::Options(*options, osg::CopyOp::DEEP_COPY_ALL);
       opts->setUserData(child_opts);
 
-      printBB(std::cout, *child_opts);
-
-      lod->addChild( 0.0f,child_rad*2.0f, fileName,opts);
+      lod->addChild( 0.0f,child_rad*3.0f, fileName,opts);
     }
     coptions = dynamic_cast< OutOfCoreOptions*>( const_cast<osg::Referenced*>(options->getUserData() ));
-    std::cout << "Final db is ";
-    printBB(std::cout, *coptions);
+
 
     return lod.get();
   }
