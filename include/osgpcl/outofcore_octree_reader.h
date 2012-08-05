@@ -80,14 +80,48 @@ namespace osgPCL
     virtual ReadResult readNode(const std::string& fileName, const osgDB::ReaderWriter::Options* options) const;
 
 
-      class OutOfCoreOptions : public osgDB::Options {
+      class OutOfCoreOptions : public osg::Referenced {
         public:
-        OutOfCoreOctree::Ptr octree;
-        osg::ref_ptr<osgPCL::PointCloudFactory> factory;
-        boost::uint64_t root_depth;
-        boost::uint64_t max_depth;
-        float sample;
-        Eigen::Vector3d bbmin, bbmax;
+        OutOfCoreOptions(float sample = 1.0);
+        OutOfCoreOptions(osgPCL::PointCloudFactory* _factory, float sample =1.0f);
+        OutOfCoreOptions( const OutOfCoreOctree::Ptr& _octree,
+                            osgPCL::PointCloudFactory* _factory);
+        OutOfCoreOptions(const OutOfCoreOptions& options,const osg::CopyOp& copyop=osg::CopyOp::SHALLOW_COPY);
+
+        bool init( const OutOfCoreOctree::Ptr & octree );
+
+        void setDepth( boost::uint64_t depth, boost::uint64_t max_depth);
+        bool depthIsSet();
+
+        boost::uint64_t getDepth();
+        boost::uint64_t getMaxDepth();
+
+        bool isRoot();
+        void setRoot(bool enable);
+
+        float getSampling();
+        void setSampling(float sample);
+
+        void setBoundingBox(const osg::Vec3d & bbmin, const osg::Vec3d& bbmax);
+        void getBoundingBox( osg::Vec3d & bbmin,       osg::Vec3d& bbmax);
+
+
+        private:
+          bool depth_set_;
+          OutOfCoreOctree::Ptr octree_;
+          osg::ref_ptr<osgPCL::PointCloudFactory> factory_;
+          boost::uint64_t depth_;
+          boost::uint64_t max_depth_;
+          float sample_;
+          osg::Vec3d bbmin_, bbmax_;
+          bool isRoot_;
+
+        public:
+          OutOfCoreOctree::Ptr getOctree(){return octree_;}
+          osgPCL::PointCloudFactory * getFactory(){return factory_.get();}
+          const osg::Vec3d& getBBmax(){return bbmax_;}
+          const osg::Vec3d& getBBmin(){return bbmin_;}
+
       };
 
   };
@@ -115,7 +149,13 @@ namespace osgPCL
       float subsample, const sensor_msgs::PointCloud2::Ptr& dst_blob) const
   {
     sensor_msgs::PointCloud2::Ptr rblob(new sensor_msgs::PointCloud2);
+
+    if (subsample>0.999) {
+      octree_->queryBBIncludes(min, max, query_depth, dst_blob);
+      return;
+    }
     octree_->queryBBIncludes(min, max, query_depth, rblob);
+
     std::vector<int> sub_indices;
     sub_indices.resize(rblob->width*rblob->height);
 
@@ -126,9 +166,7 @@ namespace osgPCL
     for(int i=0; i< sub_indices.size(); i++){
       sub_indices[i] = filedie();
     }
-
     pcl::copyPointCloud(*rblob, sub_indices, *dst_blob);
-
   }
 
   USE_OSGPLUGIN(oct_idx)

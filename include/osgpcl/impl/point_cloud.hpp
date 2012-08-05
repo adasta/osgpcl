@@ -227,7 +227,7 @@ osgPCL::PointCloudCRangeFactory<PointTXYZ, PointTF>::buildGeometry (
 {
 
   typename pcl::PointCloud<PointTXYZ>::ConstPtr xyz = getInputCloud<PointTXYZ>();
-  typename pcl::PointCloud<PointTF>::ConstPtr fcloud = getInputCloud<PointTF>();
+   typename pcl::PointCloud<PointTF>::ConstPtr fcloud = getInputCloud<PointTF>();
   if  ( (fcloud == NULL) || (xyz==NULL) ){
     return NULL;
   }
@@ -317,6 +317,7 @@ inline void osgPCL::PointCloudCRangeFactory<PointTXYZ, PointTF>::setInputCloud (
   pcl::fromROSMsg(*cloud,*xyz);
   PointCloudFactory::setInputCloud<PointTXYZ>(xyz);
 
+  for(int i=0; i<cloud->fields.size(); i++) std::cout << i << "  " << cloud->fields[i].name << "\n";
   if ( !boost::is_same<PointTXYZ, PointTF>::value){
     typename pcl::PointCloud<PointTF>::Ptr fcloud(new pcl::PointCloud<PointTF>);
     pcl::fromROSMsg(*cloud,*fcloud);

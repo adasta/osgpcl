@@ -7,9 +7,9 @@
 
 #include <osgpcl/impl/point_cloud.hpp>
 #include <osg/Point>
-
-
 #include<pcl/point_types.h>
+
+#include <osg/Geode>
 
 namespace osgPCL
 {
@@ -18,4 +18,13 @@ namespace osgPCL
   template class PointCloudRGBFactory<pcl::PointXYZ, pcl::RGB>;
   template class PointCloudCRangeFactory<pcl::PointXYZ, pcl::PointXYZ>;
 
-} /* namespace osgPCL */
+}
+
+osg::Node* osgPCL::PointCloudFactory::buildNode ()
+{
+  osg::Geode* geode = new osg::Geode;
+  geode->getDescriptions().push_back("PointCloud");
+  geode->addDrawable(buildGeometry());
+  return geode;
+}
+/* namespace osgPCL */

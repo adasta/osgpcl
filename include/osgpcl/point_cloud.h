@@ -37,7 +37,10 @@ namespace osgPCL
       PointCloudFactory(){}
       virtual ~PointCloudFactory(){}
 
+
       virtual PointCloudGeometry* buildGeometry(bool unique_stateset=false) const =0;
+
+      osg::Node * buildNode();
 
     private:
       std::map<std::string, boost::any> input_clouds_;
@@ -86,7 +89,10 @@ namespace osgPCL
     public:
 
     PointCloudCRangeFactory();
-      typedef boost::shared_ptr<typename pcl::PointCloud<PointTXYZ>::ConstPtr > CloudConstPtr;
+
+    typedef boost::shared_ptr<PointCloudCRangeFactory<PointTXYZ, PointTF> > Ptr;
+
+     typedef boost::shared_ptr<typename pcl::PointCloud<PointTXYZ>::ConstPtr > CloudConstPtr;
 
     void setField(std::string field);
     void setRangle(double min, double max);
