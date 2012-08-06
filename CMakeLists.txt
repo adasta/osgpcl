@@ -43,7 +43,7 @@ ${Boost_LIBRARIES}
 
 
 add_library(osgpcl src/point_cloud.cpp src/outofcore_octree_reader.cpp
-                   src/pagedlod.cpp)
+                    )
 target_link_libraries(osgpcl debug ${OSGPCL_DEP_LIBRARIES})
 
 add_library(osgdb_pcd src/point_cloud_reader.cpp)

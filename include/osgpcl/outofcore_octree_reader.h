@@ -99,6 +99,8 @@ namespace osgPCL
         bool isRoot();
         void setRoot(bool enable);
 
+
+
         float getSampling();
         void setSampling(float sample);
 
@@ -115,12 +117,15 @@ namespace osgPCL
           float sample_;
           osg::Vec3d bbmin_, bbmax_;
           bool isRoot_;
+          bool isLeaf_;
 
         public:
           OutOfCoreOctree::Ptr getOctree(){return octree_;}
           osgPCL::PointCloudFactory * getFactory(){return factory_.get();}
           const osg::Vec3d& getBBmax(){return bbmax_;}
           const osg::Vec3d& getBBmin(){return bbmin_;}
+          bool isLeaf(){return isLeaf_;}
+          void setLeaf(bool enable){isLeaf_=enable;}
 
       };
 

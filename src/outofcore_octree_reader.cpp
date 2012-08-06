@@ -16,8 +16,6 @@
 #include <boost/assign/std/vector.hpp>
 using namespace boost::assign;
 
-#include <osgpcl/pagedlod.h>
-
 namespace osgPCL
 {
   REGISTER_OSGPLUGIN( oct_idx ,  OutofCoreOctreeReader);
@@ -71,6 +69,8 @@ namespace osgPCL
       coptions->init( tree);
     }
 
+    std::cout << "Loading " << coptions->getDepth() << " : ";
+    printBB(std::cout, *coptions);
 
     const osg::Vec3d & bbmin =coptions->getBBmin();
     const osg::Vec3d& bbmax =coptions->getBBmax();
@@ -78,34 +78,25 @@ namespace osgPCL
     osg::Vec3d sh = size/2;
     double radius = size.length();
 
-    osg::ref_ptr<osgPCL::PagedLOD> lod = new osgPCL::PagedLOD;
+
+    if (coptions->isLeaf()){
+      sensor_msgs::PointCloud2::Ptr cloud(new sensor_msgs::PointCloud2);
+      if (coptions->getSampling() > 0.999){
+        coptions->getOctree()->queryBBIncludes(coptions->getBBmin()._v, coptions->getBBmax()._v,coptions->getDepth(), cloud);
+      }
+      else{
+        coptions->getOctree()->queryBBIncludes_subsample(coptions->getBBmin()._v, coptions->getBBmax()._v,coptions->getDepth(), coptions->getSampling(), cloud);
+      }
+
+      if (cloud->width*cloud->height == 0 ) return new osg::Node;
+      coptions->getFactory()->setInputCloud(cloud);
+      return coptions->getFactory()->buildNode();
+    }
+    osg::ref_ptr<osg::PagedLOD> lod = new osg::PagedLOD;
     lod->setCenterMode( osg::LOD::USER_DEFINED_CENTER );
     osg::Vec3d center = (bbmax + bbmin)/2.0f ;
     lod->setCenter( center );
     lod->setRadius( radius );
-
-    sensor_msgs::PointCloud2::Ptr cloud(new sensor_msgs::PointCloud2);
-    if (coptions->getSampling() > 0.999){
-      coptions->getOctree()->queryBBIncludes(coptions->getBBmin()._v, coptions->getBBmax()._v,coptions->getDepth(), cloud);
-    }
-    else{
-      coptions->getOctree()->queryBBIncludes_subsample(coptions->getBBmin()._v, coptions->getBBmax()._v,coptions->getDepth(), coptions->getSampling(), cloud);
-    }
-
-    if (cloud->width*cloud->height == 0 ) return new osg::Node;
-    coptions->getFactory()->setInputCloud(cloud);
-
-    if(coptions->isRoot()){
-     coptions->setRoot(false);
-     lod->addChild(coptions->getFactory()->buildNode(), radius, FLT_MAX);
-     }
-    else{
-      if (coptions->getDepth() == coptions->getMaxDepth()){
-        lod->addChild(coptions->getFactory()->buildNode(), 0 , radius*3);
-      }
-      else  lod->addChild(coptions->getFactory()->buildNode(), radius , radius*3);
-    }
-    coptions->getFactory()->clearInput();
 
     std::vector<osg::Vec3d > minbbs;
     minbbs += bbmin, bbmin+ osg::Vec3d(sh[0],0,0), bbmin+ osg::Vec3d(sh[0],sh[1],0),
@@ -117,39 +108,76 @@ namespace osgPCL
      int cdepth = coptions->getDepth()+1;
     if (cdepth >= coptions->getMaxDepth()) return lod.get();
 
+    osg::Group* group = new osg::Group;
+
     for(int i=0; i<8; i++){
       //todo add some way to check the number of points within a bounding box without actually retrieving them
+      osg::PagedLOD* clod = new osg::PagedLOD;
+
       OutOfCoreOptions* child_opts = new OutOfCoreOptions(*coptions, osg::CopyOp::DEEP_COPY_ALL);
-      child_opts->setBoundingBox( minbbs[i],  minbbs[i]+sh);
-      child_opts->setDepth(cdepth, coptions->getMaxDepth());
       osgDB::Options* opts = new osgDB::Options(*options, osg::CopyOp::DEEP_COPY_ALL);
       opts->setUserData(child_opts);
 
-      lod->addChild( 0.0f,child_rad*3.0f, fileName,opts);
+      osg::Vec3d vmax = minbbs[i]+sh;
+      osg::Vec3d ccenter = (vmax+ minbbs[i])/2.0f;
+      child_opts->setBoundingBox( minbbs[i],  minbbs[i]+sh);
+      child_opts->setDepth(cdepth, coptions->getMaxDepth());
+
+      clod->setFileName(0, fileName);
+      clod->setDatabaseOptions(opts);
+      clod->setRange(0,0,child_rad*3.0f);
+      clod->setCenterMode( osg::LOD::USER_DEFINED_CENTER );
+      clod->setCenter( ccenter );
+      clod->setRadius( sh.length() );
+      group->addChild(clod);
     }
+
+    if (! lod->addChild(group,0, child_rad*3)){
+      std::cout << "Failed to add group \n";
+    }
+
+
+    {
+      OutOfCoreOptions* child_opts = new OutOfCoreOptions(*coptions, osg::CopyOp::DEEP_COPY_ALL);
+      child_opts->setLeaf(true);
+      osgDB::Options* opts = new osgDB::Options(*options, osg::CopyOp::DEEP_COPY_ALL);
+      opts->setUserData(child_opts);
+      lod->setDatabaseOptions( opts);
+      lod->setFileName(1, fileName);
+    }
+    if(coptions->isRoot()){
+      lod->setRange(1,  radius, FLT_MAX);
+        coptions->setRoot(false);
+    }
+    else{
+      if (coptions->getDepth() == coptions->getMaxDepth()){
+        lod->setRange(1, 0 , radius*3);
+      }
+      else  lod->setRange(1, radius , radius*3);
+    }
+
+
     coptions = dynamic_cast< OutOfCoreOptions*>( const_cast<osg::Referenced*>(options->getUserData() ));
-
-
     return lod.get();
   }
 
   OutofCoreOctreeReader::OutOfCoreOptions::OutOfCoreOptions (float sample) : sample_ (sample),
       isRoot_(true),depth_(0), max_depth_(0), factory_(new osgPCL::PointCloudCRangeFactory<>), depth_set_(false),
-      bbmin_(0,0,0),bbmax_(0,0,0)
+      bbmin_(0,0,0),bbmax_(0,0,0), isLeaf_(false)
   {
   }
 
   OutofCoreOctreeReader::OutOfCoreOptions::OutOfCoreOptions (
       osgPCL::PointCloudFactory*  factory, float sample) : sample_ (sample),
           isRoot_(true),depth_(0), max_depth_(0), factory_(factory), depth_set_(false),
-          bbmin_(0,0,0),bbmax_(0,0,0)
+          bbmin_(0,0,0),bbmax_(0,0,0), isLeaf_(false)
   {
   }
 
   OutofCoreOctreeReader::OutOfCoreOptions::OutOfCoreOptions (
       const OutOfCoreOctree::Ptr& _octree, osgPCL::PointCloudFactory* _factory) : sample_ (1.0f),
           isRoot_(true),depth_(0), max_depth_(0), depth_set_(false), factory_(_factory),
-          bbmin_(0,0,0),bbmax_(0,0,0)
+          bbmin_(0,0,0),bbmax_(0,0,0), isLeaf_(false)
   {
     this->init(octree_ );
   }
@@ -227,6 +255,7 @@ namespace osgPCL
     this->octree_ = options.octree_;
     this->factory_ = options.factory_;
     this->sample_ = options.sample_;
+    this->isLeaf_ = options.isLeaf_;
   }
 
   void OutofCoreOctreeReader::OutOfCoreOptions::getBoundingBox (
