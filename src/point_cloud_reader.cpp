@@ -11,9 +11,9 @@
 #include <pcl/io/pcd_io.h>
 #include <osg/Geode>
 
+#include <osgpcl/common.h>
 
-
-namespace osgPCL
+namespace osgpcl
 {
   REGISTER_OSGPLUGIN( pcd ,  PointCloudReader);
 
@@ -37,18 +37,21 @@ namespace osgPCL
   osgDB::ReaderWriter::ReadResult PointCloudReader::readNode (const std::string& filename,
       const osgDB::ReaderWriter::Options* options) const
   {
-    osg::ref_ptr< CloudLoadingOptions>  coptions = new CloudLoadingOptions;
-
-    if ( dynamic_cast< const CloudLoadingOptions*>(options)  == NULL ){
-      coptions->factory = new PointCloudCRangeFactory<>;
-    }
-    else{
-      coptions->factory =  dynamic_cast< const CloudLoadingOptions*>(options)->factory ;
-      coptions->sampe_percentage =  dynamic_cast< const CloudLoadingOptions*>(options)->sampe_percentage ;
-      coptions->indices =  dynamic_cast< const CloudLoadingOptions*>(options)->indices ;
-    }
-
     boost::filesystem::path fpath(filename);
+
+    if ( fpath.extension().string() !=".pcd"){
+      return ReadResult();
+    }
+
+    osg::ref_ptr< CloudReaderOptions>  coptions  = dynamic_cast< CloudReaderOptions*>(const_cast<osgDB::Options*> (options)  );
+
+    if ( coptions == NULL ){
+      coptions = new CloudReaderOptions(new PointCloudCRangeFactory<>);
+    }
+
+    if(coptions->getFactory() == NULL){
+      coptions->setFactory( new PointCloudCRangeFactory<> );
+    }
 
     if (!boost::filesystem::exists(fpath)){
       return ReadResult(ReaderWriter::ReadResult::FILE_NOT_FOUND);
@@ -61,27 +64,20 @@ namespace osgPCL
       return ReadResult("Failed to read point cloud\n");
     }
 
-    coptions->factory->setInputCloud(cloud);
-    PointCloudGeometry* geom = coptions->factory->buildGeometry();
+    coptions->getFactory()->setInputCloud(cloud);
 
-    if (geom ==NULL){
+    osg::Node* node = coptions->getFactory()->buildNode();
+    if (node ==NULL){
       return ReadResult("Failed to build point cloud geometry\n");
     }
+    node->setName(filename.c_str());
 
-    osg::Geode* geode = new osg::Geode;
-    geode->setName(filename.c_str());
-    geode->getDescriptions().push_back("PointCloud");
-    geode->addDrawable(geom);
-    return geode;
+    return node;
   }
 
   osgDB::ReaderWriter::Features PointCloudReader::supportedFeatures () const
   {
     return FEATURE_READ_NODE;
-  }
-
-  void PointCloudReader::initsupport ()
-  {
   }
 
 } /* namespace osgPCL */

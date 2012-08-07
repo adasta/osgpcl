@@ -4,4 +4,8 @@ Carnegie Mellon University
 
 OpenSceneGraph Point Cloud Library
 
-These are a set of utilty functions for using PCL with open scene graph.
+This is a repository of PCL visualization tools implemented using 
+the OpenSceneGraph Library.  
+
+
+The cloud viewer application can view in core and out of core points.

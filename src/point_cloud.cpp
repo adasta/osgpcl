@@ -11,7 +11,7 @@
 
 #include <osg/Geode>
 
-namespace osgPCL
+namespace osgpcl
 {
 
   template class PointCloudColoredFactory<pcl::PointXYZ>;
@@ -20,7 +20,7 @@ namespace osgPCL
 
 }
 
-osg::Node* osgPCL::PointCloudFactory::buildNode ()
+osg::Node* osgpcl::PointCloudFactory::buildNode ()
 {
   osg::Geode* geode = new osg::Geode;
   geode->getDescriptions().push_back("PointCloud");

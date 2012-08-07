@@ -21,7 +21,7 @@
 
 #include <sensor_msgs/PointCloud2.h>
 
-namespace osgPCL
+namespace osgpcl
 {
 
   /*
@@ -88,18 +88,19 @@ namespace osgPCL
 
     public:
 
-    PointCloudCRangeFactory();
+    PointCloudCRangeFactory(std::string field="");
+
 
     typedef boost::shared_ptr<PointCloudCRangeFactory<PointTXYZ, PointTF> > Ptr;
 
      typedef boost::shared_ptr<typename pcl::PointCloud<PointTXYZ>::ConstPtr > CloudConstPtr;
 
     void setField(std::string field);
-    void setRangle(double min, double max);
+    void setRange(double min, double max);
     void setColorTable( const std::vector<osg::Vec4>& table);
 
-    void useJETColorTable();
-    void useGreyColorTable();
+    //void useJETColorTable();
+   // void useGreyColorTable();
 
     virtual PointCloudGeometry* buildGeometry(bool unique_stateset=false) const;
     void setPointSize(int size);

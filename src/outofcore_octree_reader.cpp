@@ -14,9 +14,11 @@
 
 #include <boost/assign.hpp>
 #include <boost/assign/std/vector.hpp>
+#include <osg/PagedLOD>
+
 using namespace boost::assign;
 
-namespace osgPCL
+namespace osgpcl
 {
   REGISTER_OSGPLUGIN( oct_idx ,  OutofCoreOctreeReader);
 
@@ -54,23 +56,35 @@ namespace osgPCL
       const osgDB::ReaderWriter::Options* options) const
   {
 
-    osg::ref_ptr< OutOfCoreOptions>   coptions = dynamic_cast< OutOfCoreOptions*>( const_cast<osg::Referenced*>(options->getUserData() ));
+    boost::filesystem::path fpath(fileName);
+
+    if ( fpath.extension().string() !=".oct_idx"){
+      return ReadResult();
+    }
+
+    osg::ref_ptr< OutOfCoreOptions>   coptions = dynamic_cast< OutOfCoreOptions*>( const_cast<osgDB::Options*>(options) );
 
     if (coptions  != NULL){
       coptions = new OutOfCoreOptions( *coptions, osg::CopyOp::DEEP_COPY_ALL);
     }
     else{
-      coptions = new OutOfCoreOptions(  new PointCloudColoredFactory<>);
+      coptions = new OutOfCoreOptions();
     }
     if (coptions->getOctree() == NULL){
       if ( ! boost::filesystem::exists(fileName))  return osgDB::ReaderWriter::ReadResult::FILE_NOT_FOUND;
       OutofCoreOctreeT<pcl::PointXYZ>::OctreePtr ot (new OutofCoreOctreeT<pcl::PointXYZ>::Octree(fileName, false));
       OutofCoreOctreeT<pcl::PointXYZ>::Ptr tree (new OutofCoreOctreeT<pcl::PointXYZ>(ot));
       coptions->init( tree);
+
     }
 
-    std::cout << "Loading " << coptions->getDepth() << " : ";
-    printBB(std::cout, *coptions);
+    if (coptions->getFactory() == NULL){
+      osgpcl::PointCloudCRangeFactory<>* fact = new osgpcl::PointCloudCRangeFactory<>("z");
+      fact->setRange(coptions->getBBmin()[2], coptions->getBBmax()[2]);
+      coptions->setFactory(fact);
+    }
+ //   std::cout << "Loading " << coptions->getDepth() << " : ";
+ //   printBB(std::cout, *coptions);
 
     const osg::Vec3d & bbmin =coptions->getBBmin();
     const osg::Vec3d& bbmax =coptions->getBBmax();
@@ -81,11 +95,11 @@ namespace osgPCL
 
     if (coptions->isLeaf()){
       sensor_msgs::PointCloud2::Ptr cloud(new sensor_msgs::PointCloud2);
-      if (coptions->getSampling() > 0.999){
+      if (coptions->getSamplingRate() > 0.999){
         coptions->getOctree()->queryBBIncludes(coptions->getBBmin()._v, coptions->getBBmax()._v,coptions->getDepth(), cloud);
       }
       else{
-        coptions->getOctree()->queryBBIncludes_subsample(coptions->getBBmin()._v, coptions->getBBmax()._v,coptions->getDepth(), coptions->getSampling(), cloud);
+        coptions->getOctree()->queryBBIncludes_subsample(coptions->getBBmin()._v, coptions->getBBmax()._v,coptions->getDepth(), coptions->getSamplingRate(), cloud);
       }
 
       if (cloud->width*cloud->height == 0 ) return new osg::Node;
@@ -115,8 +129,6 @@ namespace osgPCL
       osg::PagedLOD* clod = new osg::PagedLOD;
 
       OutOfCoreOptions* child_opts = new OutOfCoreOptions(*coptions, osg::CopyOp::DEEP_COPY_ALL);
-      osgDB::Options* opts = new osgDB::Options(*options, osg::CopyOp::DEEP_COPY_ALL);
-      opts->setUserData(child_opts);
 
       osg::Vec3d vmax = minbbs[i]+sh;
       osg::Vec3d ccenter = (vmax+ minbbs[i])/2.0f;
@@ -124,7 +136,7 @@ namespace osgPCL
       child_opts->setDepth(cdepth, coptions->getMaxDepth());
 
       clod->setFileName(0, fileName);
-      clod->setDatabaseOptions(opts);
+      clod->setDatabaseOptions(child_opts);
       clod->setRange(0,0,child_rad*3.0f);
       clod->setCenterMode( osg::LOD::USER_DEFINED_CENTER );
       clod->setCenter( ccenter );
@@ -140,9 +152,7 @@ namespace osgPCL
     {
       OutOfCoreOptions* child_opts = new OutOfCoreOptions(*coptions, osg::CopyOp::DEEP_COPY_ALL);
       child_opts->setLeaf(true);
-      osgDB::Options* opts = new osgDB::Options(*options, osg::CopyOp::DEEP_COPY_ALL);
-      opts->setUserData(child_opts);
-      lod->setDatabaseOptions( opts);
+      lod->setDatabaseOptions( child_opts);
       lod->setFileName(1, fileName);
     }
     if(coptions->isRoot()){
@@ -156,28 +166,27 @@ namespace osgPCL
       else  lod->setRange(1, radius , radius*3);
     }
 
-
-    coptions = dynamic_cast< OutOfCoreOptions*>( const_cast<osg::Referenced*>(options->getUserData() ));
     return lod.get();
   }
 
-  OutofCoreOctreeReader::OutOfCoreOptions::OutOfCoreOptions (float sample) : sample_ (sample),
-      isRoot_(true),depth_(0), max_depth_(0), factory_(new osgPCL::PointCloudCRangeFactory<>), depth_set_(false),
+  OutofCoreOctreeReader::OutOfCoreOptions::OutOfCoreOptions (float sample) :
+      CloudReaderOptions( sample),
+      isRoot_(true),depth_(0), max_depth_(0), depth_set_(false),
       bbmin_(0,0,0),bbmax_(0,0,0), isLeaf_(false)
   {
   }
 
   OutofCoreOctreeReader::OutOfCoreOptions::OutOfCoreOptions (
-      osgPCL::PointCloudFactory*  factory, float sample) : sample_ (sample),
-          isRoot_(true),depth_(0), max_depth_(0), factory_(factory), depth_set_(false),
+      osgpcl::PointCloudFactory*  factory, float sample) : CloudReaderOptions(factory, sample),
+          isRoot_(true),depth_(0), max_depth_(0), depth_set_(false),
           bbmin_(0,0,0),bbmax_(0,0,0), isLeaf_(false)
   {
   }
 
   OutofCoreOctreeReader::OutOfCoreOptions::OutOfCoreOptions (
-      const OutOfCoreOctree::Ptr& _octree, osgPCL::PointCloudFactory* _factory) : sample_ (1.0f),
-          isRoot_(true),depth_(0), max_depth_(0), depth_set_(false), factory_(_factory),
-          bbmin_(0,0,0),bbmax_(0,0,0), isLeaf_(false)
+      const OutOfCoreOctree::Ptr& _octree, osgpcl::PointCloudFactory* factory) :
+          CloudReaderOptions(factory, 1), isRoot_(true),depth_(0), max_depth_(0),
+          depth_set_(false),  bbmin_(0,0,0),bbmax_(0,0,0), isLeaf_(false)
   {
     this->init(octree_ );
   }
@@ -228,16 +237,6 @@ namespace osgPCL
     isRoot_ = enable;
   }
 
-  float OutofCoreOctreeReader::OutOfCoreOptions::getSampling ()
-  {
-    return sample_;
-  }
-
-  void OutofCoreOctreeReader::OutOfCoreOptions::setSampling (float sample)
-  {
-    sample_ =sample;
-  }
-
   void OutofCoreOctreeReader::OutOfCoreOptions::setBoundingBox (
       const osg::Vec3d& bbmin, const osg::Vec3d& bbmax)
   {
@@ -246,7 +245,7 @@ namespace osgPCL
   }
 
   OutofCoreOctreeReader::OutOfCoreOptions::OutOfCoreOptions (
-      const OutOfCoreOptions& options, const osg::CopyOp& copyop){
+      const OutOfCoreOptions& options, const osg::CopyOp& copyop) : CloudReaderOptions(options, copyop){
     this->bbmax_ = options.bbmax_;
     this->bbmin_ = options.bbmin_;
     this->isRoot_ = options.isRoot_;
@@ -254,7 +253,7 @@ namespace osgPCL
     this->max_depth_ = options.max_depth_;
     this->octree_ = options.octree_;
     this->factory_ = options.factory_;
-    this->sample_ = options.sample_;
+    this->sampling_rate_ = options.sampling_rate_;
     this->isLeaf_ = options.isLeaf_;
   }
 

@@ -22,7 +22,7 @@
 
 
   template<typename PointT>
-  inline typename pcl::PointCloud<PointT>::ConstPtr osgPCL::PointCloudFactory::getInputCloud () const
+  inline typename pcl::PointCloud<PointT>::ConstPtr osgpcl::PointCloudFactory::getInputCloud () const
   {
 
     std::string key;    // Get the fields list
@@ -48,7 +48,7 @@
   }
 
   template<typename PointT>
-  inline void osgPCL::PointCloudFactory::addXYZToVertexBuffer (osg::Geometry& geom,
+  inline void osgpcl::PointCloudFactory::addXYZToVertexBuffer (osg::Geometry& geom,
       const pcl::PointCloud<pcl::PointXYZ>& cloud) const
   {
     osg::Vec3Array* pts = new osg::Vec3Array;
@@ -65,7 +65,7 @@
   // *****************************  PointCloudColorFactory ******************
 
   template<typename PointT>
-  inline osgPCL::PointCloudColoredFactory<PointT>::PointCloudColoredFactory ()
+  inline osgpcl::PointCloudColoredFactory<PointT>::PointCloudColoredFactory ()
   {
     const char* vertSource = {
          "#version 120\n"
@@ -105,8 +105,8 @@
          stateset_->setMode( GL_LIGHTING, osg::StateAttribute::OFF );
   }
 
-  template<typename PointT> osgPCL::PointCloudGeometry*
-   osgPCL::PointCloudColoredFactory<PointT>::buildGeometry (bool unique_stateset) const
+  template<typename PointT> osgpcl::PointCloudGeometry*
+   osgpcl::PointCloudColoredFactory<PointT>::buildGeometry (bool unique_stateset) const
   {
       typename pcl::PointCloud<PointT>::ConstPtr cloud = getInputCloud<PointT>();
       if (cloud ==NULL) return NULL;
@@ -127,7 +127,7 @@
   }
 
 template<typename PointT> void
-osgPCL::PointCloudColoredFactory<PointT>::setInputCloud (
+osgpcl::PointCloudColoredFactory<PointT>::setInputCloud (
     const sensor_msgs::PointCloud2::ConstPtr& cloud)
 {
   typename pcl::PointCloud<PointT>::Ptr xyz(new pcl::PointCloud<PointT>);
@@ -136,7 +136,7 @@ osgPCL::PointCloudColoredFactory<PointT>::setInputCloud (
 }
 
   template<typename PointT> void
-  osgPCL::PointCloudColoredFactory<PointT>::setColor (float r,float g,float b,
+  osgpcl::PointCloudColoredFactory<PointT>::setColor (float r,float g,float b,
                                                             float alpha)
   {
     osg::Vec4 color;
@@ -146,11 +146,11 @@ osgPCL::PointCloudColoredFactory<PointT>::setInputCloud (
 
 
 // *************************************** PointCloudRGBFactory *************************
-  template<typename PointTXYZ, typename RGBT> osgPCL::PointCloudGeometry*
-  osgPCL::PointCloudRGBFactory<PointTXYZ, RGBT>::buildGeometry (
+  template<typename PointTXYZ, typename RGBT> osgpcl::PointCloudGeometry*
+  osgpcl::PointCloudRGBFactory<PointTXYZ, RGBT>::buildGeometry (
       bool unique_stateset) const
   {
-    osgPCL::PointCloudGeometry* geom(new PointCloudGeometry);
+    osgpcl::PointCloudGeometry* geom(new PointCloudGeometry);
 
 
     return geom;
@@ -158,7 +158,7 @@ osgPCL::PointCloudColoredFactory<PointT>::setInputCloud (
 
 
   template<typename PointTXYZ , typename RGBT>
-  inline void osgPCL::PointCloudRGBFactory<PointTXYZ, RGBT>::setInputCloud (
+  inline void osgpcl::PointCloudRGBFactory<PointTXYZ, RGBT>::setInputCloud (
       const sensor_msgs::PointCloud2::ConstPtr& cloud)
   {
     typename pcl::PointCloud<PointTXYZ>::Ptr xyz(new pcl::PointCloud<PointTXYZ>);
@@ -177,8 +177,8 @@ osgPCL::PointCloudColoredFactory<PointT>::setInputCloud (
 
 
 template<typename PointTXYZ , typename PointTF > inline
-osgPCL::PointCloudCRangeFactory<PointTXYZ, PointTF>::PointCloudCRangeFactory () :
-  max_range_(-1), min_range_(-1)
+osgpcl::PointCloudCRangeFactory<PointTXYZ, PointTF>::PointCloudCRangeFactory (std::string field) :
+  max_range_(-1), min_range_(-1), field_name_(field)
 {
   color_table_.push_back(osg::Vec4(1,1,1,1));
   color_table_.push_back(osg::Vec4(1,0,0,1));
@@ -188,14 +188,14 @@ osgPCL::PointCloudCRangeFactory<PointTXYZ, PointTF>::PointCloudCRangeFactory () 
 }
 
 template<typename PointTXYZ, typename PointTF> void
-osgPCL::PointCloudCRangeFactory<PointTXYZ, PointTF>::setField (
+osgpcl::PointCloudCRangeFactory<PointTXYZ, PointTF>::setField (
     std::string field)
 {
   field_name_ =field;
 }
 
 template<typename PointTXYZ , typename PointTF>
-inline void osgPCL::PointCloudCRangeFactory<PointTXYZ, PointTF>::setRangle (
+inline void osgpcl::PointCloudCRangeFactory<PointTXYZ, PointTF>::setRange (
     double min, double max)
 {
   min_range_ =min;
@@ -203,26 +203,15 @@ inline void osgPCL::PointCloudCRangeFactory<PointTXYZ, PointTF>::setRangle (
 }
 
 template<typename PointTXYZ, typename PointTF >
-inline void osgPCL::PointCloudCRangeFactory<PointTXYZ, PointTF>::setColorTable (
+inline void osgpcl::PointCloudCRangeFactory<PointTXYZ, PointTF>::setColorTable (
     const std::vector<osg::Vec4>& table)
 {
   color_table_ =table;
 }
 
-template<typename PointTXYZ , typename PointTF >
-inline void osgPCL::PointCloudCRangeFactory<PointTXYZ, PointTF>::useJETColorTable ()
-{
-  //TODO
-}
 
-template<typename PointTXYZ , typename PointTF>
-inline void osgPCL::PointCloudCRangeFactory<PointTXYZ, PointTF>::useGreyColorTable ()
-{
-  //TODO
-}
-
-template<typename PointTXYZ, typename PointTF> osgPCL::PointCloudGeometry*
-osgPCL::PointCloudCRangeFactory<PointTXYZ, PointTF>::buildGeometry (
+template<typename PointTXYZ, typename PointTF> osgpcl::PointCloudGeometry*
+osgpcl::PointCloudCRangeFactory<PointTXYZ, PointTF>::buildGeometry (
       bool unique_stateset) const
 {
 
@@ -271,7 +260,8 @@ osgPCL::PointCloudCRangeFactory<PointTXYZ, PointTF>::buildGeometry (
 
   osg::Vec4Array* colors = new osg::Vec4Array;
   colors->resize(fcloud->points.size());
-  for(int i=0; i< fcloud->points.size(); i++){
+  int psize = fcloud->points.size();
+  for(int i=0; i< psize; i++){
    double val = *( (float*) (  ( (uint8_t* ) &fcloud->points[i] )  + offset ) );
    double idx = (val-minr)*scale;
    if (idx <0) idx=0;
@@ -301,7 +291,7 @@ osgPCL::PointCloudCRangeFactory<PointTXYZ, PointTF>::buildGeometry (
 }
 
 template<typename PointTXYZ , typename PointTF > void
-osgPCL::PointCloudCRangeFactory<PointTXYZ, PointTF>::setPointSize (
+osgpcl::PointCloudCRangeFactory<PointTXYZ, PointTF>::setPointSize (
       int size)
   {
     osg::Point* p = new osg::Point();
@@ -310,7 +300,7 @@ osgPCL::PointCloudCRangeFactory<PointTXYZ, PointTF>::setPointSize (
   }
 
 template<typename PointTXYZ , typename PointTF >
-inline void osgPCL::PointCloudCRangeFactory<PointTXYZ, PointTF>::setInputCloud (
+inline void osgpcl::PointCloudCRangeFactory<PointTXYZ, PointTF>::setInputCloud (
     const sensor_msgs::PointCloud2::ConstPtr& cloud)
 {
   typename  pcl::PointCloud<PointTXYZ>::Ptr xyz(new pcl::PointCloud<PointTXYZ>);
@@ -326,14 +316,14 @@ inline void osgPCL::PointCloudCRangeFactory<PointTXYZ, PointTF>::setInputCloud (
 
   //**************************************** Intensity Point Cloud *******************
 
-template<typename PointTXYZ, typename IntensityT>  osgPCL::PointCloudGeometry*
-osgPCL::PointCloudIFactory<PointTXYZ, IntensityT>::buildGeometry () const
+template<typename PointTXYZ, typename IntensityT>  osgpcl::PointCloudGeometry*
+osgpcl::PointCloudIFactory<PointTXYZ, IntensityT>::buildGeometry () const
   {
   }
 
 
 template<typename PointTXYZ, typename IntensityT>
-inline void osgPCL::PointCloudIFactory<PointTXYZ, IntensityT>::setInputCloud (
+inline void osgpcl::PointCloudIFactory<PointTXYZ, IntensityT>::setInputCloud (
     const sensor_msgs::PointCloud2::ConstPtr& cloud)
 {
   typename pcl::PointCloud<PointTXYZ>::Ptr xyz(new pcl::PointCloud<PointTXYZ>);

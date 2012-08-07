@@ -39,13 +39,11 @@ int main(int argc, char** argv){
   double sample = atof(argv[2]);
   int depth = atoi(argv[3]);
 
-  osg::ref_ptr< osgPCL::PointCloudCRangeFactory<> >   cfactory(new osgPCL::PointCloudCRangeFactory<>);
+  osg::ref_ptr< osgpcl::PointCloudCRangeFactory<> >   cfactory(new osgpcl::PointCloudCRangeFactory<>);
   cfactory->setField("z");
   cfactory->setRangle(1000,1100);
 
-  osgPCL::OutofCoreOctreeReader::OutOfCoreOptions* options = new osgPCL::OutofCoreOctreeReader::OutOfCoreOptions(cfactory,0.1);
-
-  //options->setBoundingBox(osg::Vec3d(-0.000488276 , -0.000488276, 1000.7 ), osg::Vec3d(10,10, 1030));
+  osgpcl::OutofCoreOctreeReader::OutOfCoreOptions* options = new osgpcl::OutofCoreOctreeReader::OutOfCoreOptions(cfactory,0.1);
 
   osgViewer::Viewer viewer;
   viewer.setUpViewInWindow(0,0,500,500,0);
