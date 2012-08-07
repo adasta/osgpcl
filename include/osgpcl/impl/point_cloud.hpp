@@ -21,6 +21,9 @@
 #include <boost/type_traits.hpp>
 
 
+#include <stdlib.h>
+#include <time.h>
+
   template<typename PointT>
   inline typename pcl::PointCloud<PointT>::ConstPtr osgpcl::PointCloudFactory::getInputCloud () const
   {
@@ -337,5 +340,118 @@ inline void osgpcl::PointCloudIFactory<PointTXYZ, IntensityT>::setInputCloud (
   }
 }
 
+
+//******************************* Label Point Cloud **********************************/
+template<typename PointTXYZ, typename LabelT>
+inline osgpcl::PointCloudLabelFactory<PointTXYZ, LabelT>::PointCloudLabelFactory ()
+{
+  //set up a basic color map for consistency on the typical labels used
+  color_map_[0] = osg::Vec4f(0.2,0.2,0.2,1);
+  color_map_[1] = osg::Vec4f(0.4,0.1,0.1,1);
+  color_map_[2] = osg::Vec4f(0.4,0.4,0.1,1);
+  color_map_[3] = osg::Vec4f(0.4,0.1,0.4,1);
+  color_map_[4] = osg::Vec4f(0.1,0.8,0.1,1);
+  color_map_[5] = osg::Vec4f(0.8,0.1,0.1,1);
+  color_map_[6] = osg::Vec4f(0.8,0.8,0.1,1);
+  color_map_[7] = osg::Vec4f(0.8,0.1,0.8,1);
+  color_map_[8] = osg::Vec4f(0.1,0.8,0.1,1);
+  color_map_[9] = osg::Vec4f(0.6,0.3,0.3,1);
+  color_map_[10] = osg::Vec4f(0.6,0.6,0.3,1);
+  color_map_[11] = osg::Vec4f(0.6,0.3,0.6,1);
+  color_map_[12] = osg::Vec4f(0.3,0.6,0.3,1);
+  random_coloring_ =true;
+
+  stateset_ = new osg::StateSet;
+  stateset_->setMode( GL_LIGHTING, osg::StateAttribute::OFF );
+  osg::Point* p = new osg::Point();
+  p->setSize(4);
+  stateset_->setAttribute(p);
+}
+
+template<typename PointTXYZ, typename LabelT>
+inline osgpcl::PointCloudGeometry* osgpcl::PointCloudLabelFactory<PointTXYZ, LabelT>::buildGeometry (
+    bool unique_stateset) const
+{
+
+  typename pcl::PointCloud<PointTXYZ>::ConstPtr xyz = getInputCloud<PointTXYZ>();
+   typename pcl::PointCloud<LabelT>::ConstPtr lcloud = getInputCloud<LabelT>();
+  if  ( (lcloud == NULL) || (xyz==NULL) ){
+    return NULL;
+  }
+
+  if ( lcloud->points.size() != xyz->points.size() ){
+    pcl::console::print_error("[PointCLoudLabelFactory]  XYZ and Label Clouds have different # of points.\n");
+    return NULL;
+  }
+
+  //TODO Make the color table a texture and then just
+  // reference the texture inside the shader
+
+  osg::Vec4Array* colors = new osg::Vec4Array;
+  colors->reserve(lcloud->points.size());
+  int psize = lcloud->points.size();
+
+  ColorMap cmap = color_map_;
+  srand(time(NULL));
+  for(int i=0; i<psize; i++){
+   ColorMap::iterator iter =  cmap.find( lcloud->points[i].label);
+   if (iter ==  color_map_.end()){
+     osg::Vec4f color;
+    if (random_coloring_)
+      for(int i=0; i<3; i++) color[i] = (  (float) (rand()%900) )/900.0f +0.1;
+    else color = osg::Vec4f(0,0,0,1);
+     color[3]=1;
+     cmap[lcloud->points[i].label] = color;
+     colors->push_back(color);
+   }
+   else{
+     colors->push_back(iter->second);
+   }
+  }
+
+  PointCloudGeometry* geom = new PointCloudGeometry;
+
+  this->addXYZToVertexBuffer<PointTXYZ>(*geom, *xyz);
+
+  geom->setColorArray(colors);
+  geom->setColorBinding(osg::Geometry::BIND_PER_VERTEX);
+
+  if (unique_stateset){
+    geom->setStateSet(new osg::StateSet(*stateset_));
+  }
+  else{
+    geom->setStateSet(stateset_);
+  }
+  return geom;
+}
+
+template<typename PointTXYZ, typename LabelT>
+inline void osgpcl::PointCloudLabelFactory<PointTXYZ, LabelT>::setInputCloud (
+    const sensor_msgs::PointCloud2::ConstPtr& cloud)
+{
+  typename pcl::PointCloud<PointTXYZ>::Ptr xyz(new pcl::PointCloud<PointTXYZ>);
+    pcl::fromROSMsg(*cloud,*xyz);
+    PointCloudFactory::setInputCloud<PointTXYZ>(xyz);
+
+    if ( !boost::is_same<PointTXYZ, LabelT>::value){
+      typename  pcl::PointCloud<LabelT>::Ptr icloud(new pcl::PointCloud<LabelT>);
+      pcl::fromROSMsg(*cloud,*icloud);
+      PointCloudFactory::setInputCloud<LabelT>(icloud);
+    }
+}
+
+template<typename PointTXYZ, typename LabelT>
+inline void osgpcl::PointCloudLabelFactory<PointTXYZ, LabelT>::setColorMap (
+    const ColorMap& color_map)
+{
+  color_map_= color_map;
+}
+
+template<typename PointTXYZ, typename LabelT>
+inline void osgpcl::PointCloudLabelFactory<PointTXYZ, LabelT>::enableRandomColoring (
+    bool enable)
+{
+  random_coloring_ = enable;
+}
 
 #endif /* POINT_CLOUD_HPP_ */

@@ -16,6 +16,17 @@
 
 namespace osgpcl{
 
+
+  /*
+   * Inspects the point cloud field list to choose the best default representation
+   * Point Clouds with RGB- >  PointCloudRGBFactory
+   * Intensity ->  PointCloudIntensityFactory
+   * Label ->  PointCloudLabelFactory
+   * XYZ   ->  PointCloudCRange over field Z
+   */
+  PointCloudFactory* chooseDefaultRepresentation(const std::vector<sensor_msgs::PointField>& flist);
+
+
   class CloudReaderOptions : public osgDB::Options{
     public:
     META_Object(osgpcl::CloudReaderOptions, CloudReaderOptions);

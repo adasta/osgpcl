@@ -56,6 +56,9 @@ add_executable(cloud_viewer apps/cloud_viewer.cpp)
 target_link_libraries(cloud_viewer osgpcl ${OSGPCL_DEP_LIBRARIES} osgdb_pcd osgdb_oct_idx)
 
 
+add_executable(outofcore_process tools/outofcore_process.cpp)
+target_link_libraries(outofcore_process ${PCL_LIBRARIES} ${Boost_LIBRARIES})
+
 #add a directory for throw away programs for testing out code
 if( IS_DIRECTORY "${CMAKE_SOURCE_DIR}/scratch")
 message(STATUS "Adding scratch directory")

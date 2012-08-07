@@ -55,6 +55,10 @@ osgDB::Registry::instance()->addReaderWriter(new osgpcl::OutofCoreOctreeReader);
 
 for(int i=0; i< infiles.size(); i++) {
   pcl::console::print_info("Loading :  %s \n", infiles[i].c_str());
+  pcl::PCDReader reader;
+  sensor_msgs::PointCloud2 header;
+  if ( reader.readHeader(infiles[i], header) >= 0)
+    options->setFactory( osgpcl::chooseDefaultRepresentation( header.fields));
   viewer.setSceneData( osgDB::readNodeFile(infiles[i], options));
 }
 viewer.getCamera()->setClearColor( osg::Vec4(0,0,0,1));

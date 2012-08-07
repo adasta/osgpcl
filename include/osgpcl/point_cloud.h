@@ -40,10 +40,13 @@ namespace osgpcl
 
       virtual PointCloudGeometry* buildGeometry(bool unique_stateset=false) const =0;
 
+    //  void setInputIndices(const pcl::IndicesConstPtr& indices);
+
       osg::Node * buildNode();
 
     private:
       std::map<std::string, boost::any> input_clouds_;
+     // pcl::IndicesConstPtr indices_;
 
     public:
       template<typename PointT>
@@ -132,7 +135,35 @@ namespace osgpcl
   };
 
 
+  template<typename PointTXYZ, typename LabelT>
+  class PointCloudLabelFactory : public PointCloudFactory{
+
+    public:
+    PointCloudLabelFactory();
+
+    virtual PointCloudGeometry* buildGeometry(bool unique_stateset=false) const;
+
+    using PointCloudFactory::setInputCloud;
+    virtual void setInputCloud(const sensor_msgs::PointCloud2::ConstPtr& cloud);
+
+
+    typedef  std::map<uint32_t, osg::Vec4f> ColorMap;
+    void setColorMap( const ColorMap& color_map);
+
+    /*
+     * If the color map does not have a color assigned to the label,
+     * the factory generates a random set of colors
+     */
+    void enableRandomColoring(bool enable);
+
+    private:
+      std::map<uint32_t, osg::Vec4f> color_map_;
+      bool random_coloring_;
+  };
+
 }
+
+
 
 /* namespace osgPCL */
 #endif /* POINT_CLOUD_H_ */

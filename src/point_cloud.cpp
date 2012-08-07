@@ -17,7 +17,7 @@ namespace osgpcl
   template class PointCloudColoredFactory<pcl::PointXYZ>;
   template class PointCloudRGBFactory<pcl::PointXYZ, pcl::RGB>;
   template class PointCloudCRangeFactory<pcl::PointXYZ, pcl::PointXYZ>;
-
+  template class PointCloudLabelFactory<pcl::PointXYZ, pcl::Label>;
 }
 
 osg::Node* osgpcl::PointCloudFactory::buildNode ()
