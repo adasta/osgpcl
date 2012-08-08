@@ -7,5 +7,32 @@ OpenSceneGraph Point Cloud Library
 This is a repository of PCL visualization tools implemented using 
 the OpenSceneGraph Library.  
 
-
 The cloud viewer application can view in core and out of core points.
+
+Depedencies:
+
+PCL
+http://www.pointclouds.org/
+
+OpenSceneGraph
+http://www.openscenegraph.org/
+
+
+Usage:
+
+To force color rendering (needed for out of core viewing) use 
+cloud_viewer -C 
+
+
+You can find a large example point cloud to try at:
+https://www.dropbox.com/s/djiey6b4jnc5dv0/chappes.pcd
+
+The same cloud as an out of core cloud :
+https://www.dropbox.com/s/7hdhhcr0ez9fohb/chappes_tree.tar.gz
+
+Use "cloud_viewer -c chappes_tree/tree.oct_idx" to view in color.
+
+This is the Chappes Cathedral Dataset courtesy of Prof. Peter Allen, 
+Columbia University Robotics Lab. Scanning by Alejandro Troccoli
+ and Matei Ciocarlie.  It was taken from 
+ http://pr.willowgarage.com/data/megatree/chappes.pts
