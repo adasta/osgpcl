@@ -67,9 +67,14 @@ namespace osgpcl
     if (coptions  != NULL){
       coptions = new OutOfCoreOptions( *coptions, osg::CopyOp::DEEP_COPY_ALL);
     }
+    else if ( dynamic_cast< CloudReaderOptions*>( const_cast<osgDB::Options*>(options) ) !=NULL){
+      CloudReaderOptions* cro = dynamic_cast< CloudReaderOptions*>( const_cast<osgDB::Options*>(options) );
+      coptions = new OutOfCoreOptions(cro->getFactory(), cro->getSamplingRate());
+    }
     else{
       coptions = new OutOfCoreOptions();
-    }
+      }
+
     if (coptions->getOctree() == NULL){
       if ( ! boost::filesystem::exists(fileName))  return osgDB::ReaderWriter::ReadResult::FILE_NOT_FOUND;
       OutofCoreOctreeT<pcl::PointXYZ>::OctreePtr ot (new OutofCoreOctreeT<pcl::PointXYZ>::Octree(fileName, false));
@@ -90,7 +95,7 @@ namespace osgpcl
     const osg::Vec3d& bbmax =coptions->getBBmax();
     osg::Vec3d size = coptions->getBBmax() -coptions->getBBmin();
     osg::Vec3d sh = size/2;
-    double radius = size.length();
+    double radius = sh.length();
 
 
     if (coptions->isLeaf()){
@@ -118,7 +123,7 @@ namespace osgpcl
         bbmin+ osg::Vec3d(sh[0], sh[1], sh[2]),  bbmin+osg::Vec3d(sh[0], 0 , sh[2]),
         bbmin+osg::Vec3d(0, 0, sh[2]);
 
-    float child_rad = sh.length();
+    float child_rad = sh.length()/2;
      int cdepth = coptions->getDepth()+1;
     if (cdepth >= coptions->getMaxDepth()) return lod.get();
 
@@ -137,14 +142,14 @@ namespace osgpcl
 
       clod->setFileName(0, fileName);
       clod->setDatabaseOptions(child_opts);
-      clod->setRange(0,0,child_rad*3.0f);
+      clod->setRange(0,0,child_rad*5.0f);
       clod->setCenterMode( osg::LOD::USER_DEFINED_CENTER );
       clod->setCenter( ccenter );
-      clod->setRadius( sh.length() );
+      clod->setRadius( radius/2.0 );
       group->addChild(clod);
     }
 
-    if (! lod->addChild(group,0, child_rad*3)){
+    if (! lod->addChild(group,0, child_rad*5)){
       std::cout << "Failed to add group \n";
     }
 
@@ -161,11 +166,10 @@ namespace osgpcl
     }
     else{
       if (coptions->getDepth() == coptions->getMaxDepth()){
-        lod->setRange(1, 0 , radius*3);
+        lod->setRange(1, 0 , radius*5);
       }
-      else  lod->setRange(1, radius , radius*3);
+      else  lod->setRange(1, radius , radius*5);
     }
-
     return lod.get();
   }
 

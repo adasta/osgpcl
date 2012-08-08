@@ -20,6 +20,14 @@ namespace osgpcl
   template class PointCloudLabelFactory<pcl::PointXYZ, pcl::Label>;
 }
 
+osgpcl::PointCloudFactory::PointCloudFactory(){
+  stateset_ = new osg::StateSet;
+   osg::Point* p = new osg::Point;
+   p->setSize(4);
+   stateset_->setAttribute(p);
+   stateset_->setMode( GL_LIGHTING, osg::StateAttribute::OFF );
+}
+
 osg::Node* osgpcl::PointCloudFactory::buildNode ()
 {
   osg::Geode* geode = new osg::Geode;

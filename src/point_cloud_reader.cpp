@@ -49,10 +49,6 @@ namespace osgpcl
       coptions = new CloudReaderOptions(new PointCloudCRangeFactory<>);
     }
 
-    if(coptions->getFactory() == NULL){
-      coptions->setFactory( new PointCloudCRangeFactory<> );
-    }
-
     if (!boost::filesystem::exists(fpath)){
       return ReadResult(ReaderWriter::ReadResult::FILE_NOT_FOUND);
     }
@@ -63,6 +59,10 @@ namespace osgpcl
     if ( reader.read(filename, *cloud) <0 ){
       return ReadResult("Failed to read point cloud\n");
     }
+
+    if(coptions->getFactory() == NULL){
+       coptions->setFactory( chooseDefaultRepresentation(cloud->fields) );
+     }
 
     coptions->getFactory()->setInputCloud(cloud);
 

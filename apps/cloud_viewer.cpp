@@ -22,6 +22,7 @@ int main(int argc, char** argv){
     ("help", "produce help message")
     ("input,i",po::value<std::vector<std::string> >(&infiles)->multitoken()->required(), "input point cloud ")
     ("sampling_rate,s", po::value<float>(), "randomly subsample the input cloud")
+    ("color,C",  "Render point cloud using RGB field")
     ;
 
   po::positional_options_description p;
@@ -45,6 +46,10 @@ int main(int argc, char** argv){
  if( vm.count("sampling_rate")){
    options->setSamplingRate(vm["sampling_rate"].as<float>() );
  }
+ if (vm.count("color")){
+   options->setFactory( new osgpcl::PointCloudRGBFactory<pcl::PointXYZ, pcl::RGB>());
+   pcl::console::print_info("Using RGB Field for Rendering...\n");
+ }
 
 osgViewer::Viewer viewer;
 viewer.setUpViewInWindow(0,0,500,500,0);
@@ -55,10 +60,6 @@ osgDB::Registry::instance()->addReaderWriter(new osgpcl::OutofCoreOctreeReader);
 
 for(int i=0; i< infiles.size(); i++) {
   pcl::console::print_info("Loading :  %s \n", infiles[i].c_str());
-  pcl::PCDReader reader;
-  sensor_msgs::PointCloud2 header;
-  if ( reader.readHeader(infiles[i], header) >= 0)
-    options->setFactory( osgpcl::chooseDefaultRepresentation( header.fields));
   viewer.setSceneData( osgDB::readNodeFile(infiles[i], options));
 }
 viewer.getCamera()->setClearColor( osg::Vec4(0,0,0,1));
