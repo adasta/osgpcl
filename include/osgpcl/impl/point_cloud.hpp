@@ -155,6 +155,47 @@ osgpcl::PointCloudColoredFactory<PointT>::setInputCloud (
   {
     osgpcl::PointCloudGeometry* geom(new PointCloudGeometry);
 
+    typename pcl::PointCloud<PointTXYZ>::ConstPtr xyz = getInputCloud<PointTXYZ>();
+      typename pcl::PointCloud<RGBT>::ConstPtr rgb = getInputCloud<RGBT>();
+     if  ( (rgb == NULL) || (xyz==NULL) ){
+       return NULL;
+     }
+
+     if ( rgb->points.size() != xyz->points.size() ){
+       pcl::console::print_error("[PointCloudRGBFactory]  XYZ and Label Clouds have different # of points.\n");
+       return NULL;
+     }
+
+     //TODO Make the color table a texture and then just
+     // reference the texture inside the shader
+
+     osg::Vec4Array* colors = new osg::Vec4Array;
+     colors->reserve(rgb->points.size());
+     int psize = rgb->points.size();
+
+     srand(time(NULL));
+     for(int i=0; i<psize; i++){
+         osg::Vec4f c;
+        c[0]= (float) rgb->points[i].r/255.0f;
+        c[1] = (float)rgb->points[i].g/255.0f;
+        c[2] = (float)rgb->points[i].b/255.0f;
+        c[3] = 1;
+        colors->push_back(c);
+     }
+
+
+     this->addXYZToVertexBuffer<PointTXYZ>(*geom, *xyz);
+
+     geom->setColorArray(colors);
+     geom->setColorBinding(osg::Geometry::BIND_PER_VERTEX);
+
+     if (unique_stateset){
+       geom->setStateSet(new osg::StateSet(*stateset_));
+     }
+     else{
+       geom->setStateSet(stateset_);
+     }
+     return geom;
 
     return geom;
   }
@@ -380,7 +421,7 @@ inline osgpcl::PointCloudGeometry* osgpcl::PointCloudLabelFactory<PointTXYZ, Lab
   }
 
   if ( lcloud->points.size() != xyz->points.size() ){
-    pcl::console::print_error("[PointCLoudLabelFactory]  XYZ and Label Clouds have different # of points.\n");
+    pcl::console::print_error("[PointCloudLabelFactory]  XYZ and Label Clouds have different # of points.\n");
     return NULL;
   }
 

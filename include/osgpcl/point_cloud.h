@@ -34,7 +34,7 @@ namespace osgpcl
 
   class PointCloudFactory :  public osg::Referenced {
     public:
-      PointCloudFactory(){}
+      PointCloudFactory();
       virtual ~PointCloudFactory(){}
 
 
