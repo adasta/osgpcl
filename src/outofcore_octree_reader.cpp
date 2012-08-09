@@ -168,7 +168,7 @@ namespace osgpcl
       if (coptions->getDepth() == coptions->getMaxDepth()){
         lod->setRange(1, 0 , radius*5);
       }
-      else  lod->setRange(1, radius , radius*5);
+      else  lod->setRange(1, radius/2 , radius*5);
     }
     return lod.get();
   }

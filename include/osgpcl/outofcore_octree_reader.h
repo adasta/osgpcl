@@ -59,9 +59,16 @@ namespace osgpcl
           float subsample, const sensor_msgs::PointCloud2::Ptr& dst_blob) const;
     protected:
       OctreePtr octree_;
+      typedef Eigen::Map<const Eigen::Vector3d> ConstVec3dMap;
+      typedef Eigen::Map< Eigen::Vector3d>  Vec3dMap;
+
     public:
       virtual boost::uint64_t getTreeDepth() const { return octree_->getDepth();};
-      virtual void getBoundingBox(  double * min,   double * max){octree_->getBB(min, max);}
+      virtual void getBoundingBox(  double * min,   double * max){
+        Eigen::Vector3d bmin, bmax;
+        octree_->getBB(bmin,  bmax );
+        for(int i=0;i<3; i++) {min[i]=bmin[i]; max[i]=bmax[i];}
+      }
 
   };
 
@@ -140,7 +147,7 @@ namespace osgpcl
       const double min[3], const double max[3], size_t query_depth,
       const sensor_msgs::PointCloud2::Ptr& dst_blob) const
   {
-    octree_->queryBBIncludes(min, max, query_depth, dst_blob);
+    octree_->queryBBIncludes(ConstVec3dMap(min), ConstVec3dMap(max), query_depth, dst_blob);
   }
 
   template<typename PointT>
@@ -149,12 +156,11 @@ namespace osgpcl
       float subsample, const sensor_msgs::PointCloud2::Ptr& dst_blob) const
   {
     sensor_msgs::PointCloud2::Ptr rblob(new sensor_msgs::PointCloud2);
-
     if (subsample>0.999) {
-      octree_->queryBBIncludes(min, max, query_depth, dst_blob);
+      octree_->queryBBIncludes(ConstVec3dMap(min), ConstVec3dMap(max), query_depth, dst_blob);
       return;
     }
-    octree_->queryBBIncludes(min, max, query_depth, rblob);
+    else octree_->queryBBIncludes(ConstVec3dMap(min), ConstVec3dMap(max), query_depth, rblob);
 
     std::vector<int> sub_indices;
     sub_indices.resize(rblob->width*rblob->height);

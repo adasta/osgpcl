@@ -140,8 +140,10 @@ outofcoreProcess (std::vector<boost::filesystem::path> pcd_paths, boost::filesys
   std::cout << "Bounds: " << min_pt << " - " << max_pt << std::endl;
 
   // The bounding box of the root node of the out-of-core octree must be specified
-  const double bounding_box_min[3] = {min_pt.x, min_pt.y, min_pt.z};
-  const double bounding_box_max[3] = {max_pt.x, max_pt.y, max_pt.z};
+  Eigen::Vector3d bounding_box_min;
+  bounding_box_min << min_pt.x, min_pt.y, min_pt.z;
+  Eigen::Vector3d  bounding_box_max;
+  bounding_box_max << max_pt.x, max_pt.y, max_pt.z;
 
   //specify the directory and the root node's meta data file with a
   //".oct_idx" extension (currently it must be this extension)
@@ -316,10 +318,12 @@ main (int argc, char* argv[])
     root_dir = root_dir.parent_path () / (root_dir.stem().string() + "_tree").c_str();
 
 if (find_switch(argc, argv, "-C") ){
-	  return outofcoreProcess<pcl::PointXYZRGB>(pcd_paths, root_dir, depth, resolution, build_octree_with, gen_lod, overwrite);
+	std::cout << "Color Generation disabled so that it compiles with trunk. \n Once Bug #773 patch is applied, you can use this command\n ";
+  // return outofcoreProcess<pcl::PointXYZRGBA>(pcd_paths, root_dir, depth, resolution, build_octree_with, gen_lod, overwrite);
 }
 if ( find_switch(argc, argv, "-L") ){
-	  return outofcoreProcess<pcl::PointXYZL>(pcd_paths, root_dir, depth, resolution, build_octree_with, gen_lod, overwrite);
+  std::cout << "Color Generation disabled so that it compiles with trunk. \n Once Bug #773 patch is applied, you can use this command\n ";
+	 // return outofcoreProcess<pcl::PointXYZL>(pcd_paths, root_dir, depth, resolution, build_octree_with, gen_lod, overwrite);
 }
 	  return outofcoreProcess<pcl::PointXYZ>(pcd_paths, root_dir, depth, resolution, build_octree_with, gen_lod, overwrite);
 }
