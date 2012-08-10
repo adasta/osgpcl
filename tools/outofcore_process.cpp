@@ -233,6 +233,7 @@ printHelp (int, char **argv)
   print_info ("\t -overwrite                    \t Overwrite existing octree\n");
   print_info ("\t -h                            \t Display help\n");
   print_info ("\t -C                    \t Use PointXYZRGB\n");
+  print_info ("\t -I                    \t Use PointXYZI\n");
   print_info ("\t -L                    \t Use PointLabel\n");
 
   print_info ("\n");
@@ -318,12 +319,13 @@ main (int argc, char* argv[])
     root_dir = root_dir.parent_path () / (root_dir.stem().string() + "_tree").c_str();
 
 if (find_switch(argc, argv, "-C") ){
-	std::cout << "Color Generation disabled so that it compiles with trunk. \n Once Bug #773 patch is applied, you can use this command\n ";
-  // return outofcoreProcess<pcl::PointXYZRGBA>(pcd_paths, root_dir, depth, resolution, build_octree_with, gen_lod, overwrite);
+    return outofcoreProcess<pcl::PointXYZRGBA>(pcd_paths, root_dir, depth, resolution, build_octree_with, gen_lod, overwrite);
+}
+if (find_switch(argc, argv, "-I") ){
+    return outofcoreProcess<pcl::PointXYZI>(pcd_paths, root_dir, depth, resolution, build_octree_with, gen_lod, overwrite);
 }
 if ( find_switch(argc, argv, "-L") ){
-  std::cout << "Color Generation disabled so that it compiles with trunk. \n Once Bug #773 patch is applied, you can use this command\n ";
-	 // return outofcoreProcess<pcl::PointXYZL>(pcd_paths, root_dir, depth, resolution, build_octree_with, gen_lod, overwrite);
+	  return outofcoreProcess<pcl::PointXYZL>(pcd_paths, root_dir, depth, resolution, build_octree_with, gen_lod, overwrite);
 }
 	  return outofcoreProcess<pcl::PointXYZ>(pcd_paths, root_dir, depth, resolution, build_octree_with, gen_lod, overwrite);
 }
