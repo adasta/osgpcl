@@ -49,6 +49,9 @@
 #include <pcl/outofcore/outofcore.h>
 #include <pcl/outofcore/outofcore_impl.h>
 
+#include <boost/program_options.hpp>
+namespace po=boost::program_options;
+
 // todo: Read clouds as PointCloud2 so we don't need to define PointT explicitly.
 //       This also requires our octree to take PointCloud2 as an input.
 
@@ -93,7 +96,7 @@ template <typename PointT> int
 outofcoreProcess (std::vector<boost::filesystem::path> pcd_paths, boost::filesystem::path root_dir,
                   int depth, double resolution, int build_octree_with, bool gen_lod, bool overwrite)
 {
-	typedef octree_base<octree_disk_container<PointT> , PointT> octree_disk;
+	typedef pcl::outofcore::OutofcoreOctreeBase<pcl::outofcore::OutofcoreOctreeDiskContainer<PointT> , PointT> octree_disk;
 
   // Bounding box min/max pts
   PointT min_pt, max_pt;
@@ -195,7 +198,7 @@ outofcoreProcess (std::vector<boost::filesystem::path> pcd_paths, boost::filesys
     }
     else
     {
-      pts = outofcore_octree->addPointCloud (cloud);
+      pts = outofcore_octree->addPointCloud (cloud, true);
     }
 
     print_info ("Successfully added %lu points\n", pts);
@@ -219,50 +222,44 @@ outofcoreProcess (std::vector<boost::filesystem::path> pcd_paths, boost::filesys
   return 0;
 }
 
-void
-printHelp (int, char **argv)
-{
-  print_info ("This program is used to process pcd fiels into an outofcore data structure viewable by the");
-  print_info ("pcl_outofcore_viewer\n\n");
-  print_info ("%s <options> <input>.pcd <output_tree_dir>\n", argv[0]);
-  print_info ("\n");
-  print_info ("Options:\n");
-  print_info ("\t -depth <resolution>           \t Octree depth\n");
-  print_info ("\t -resolution <resolution>      \t Octree resolution\n");
-  print_info ("\t -gen_lod                      \t Generate octree LODs\n");
-  print_info ("\t -overwrite                    \t Overwrite existing octree\n");
-  print_info ("\t -h                            \t Display help\n");
-  print_info ("\t -C                    \t Use PointXYZRGB\n");
-  print_info ("\t -I                    \t Use PointXYZI\n");
-  print_info ("\t -L                    \t Use PointLabel\n");
 
-  print_info ("\n");
-}
 
 int
 main (int argc, char* argv[])
 {
-  // Check for help (-h) flag
-  if (argc > 1)
+  po::options_description desc("./outofcore_process output inputs...");
+
+
+
+  desc.add_options()
+      ("input,i", po::value< std::vector<std::string> >()->multitoken()->required(), "Input Point Clouds")
+      ("output,o",po::value<std::string>(), "Output out of core directory")
+      ("depth,d",po::value<int>(), "specify the depth of the octree")
+      ("resolution,r",po::value<float>(), "specify the lowest leave resolution")
+      ("gen_lod,g",   "generate lod represetnation as the cloud is built")
+      ("overwrite,W",  "overwite old point cloud")
+      ("color,C" , "Use PointXYZRGB")
+      ("label,L" , "Use PointXYZL")
+      ("intensity,I" , "Use PointXYZI")
+      ;
+
+
+  po::positional_options_description p;
+  p.add("output",1);
+  p.add("input", -1);
+
+  po::variables_map vm;
+  try{
+   po::store(po::command_line_parser(argc, argv).options(desc).positional(p).run(), vm);
+   po::notify(vm);
+  }
+  catch( const std::exception& e)
   {
-    if (find_switch (argc, argv, "-h"))
-    {
-      printHelp (argc, argv);
-      return (-1);
-    }
+      std::cerr << e.what() << std::endl;
+      std::cout << desc << std::endl;
+      return 1;
   }
 
-  // If no arguments specified
-  if (argc - 1 < 1)
-  {
-    printHelp (argc, argv);
-    return (-1);
-  }
-
-  if (find_switch (argc, argv, "-debug"))
-  {
-    pcl::console::setVerbosityLevel ( pcl::console::L_DEBUG );
-  }
 
   // Defaults
   int depth = 4;
@@ -272,35 +269,35 @@ main (int argc, char* argv[])
   int build_octree_with = OCTREE_DEPTH;
 
   // If both depth and resolution specified
-  if (find_switch (argc, argv, "-depth") && find_switch (argc, argv, "-resolution"))
+  if (vm.count("depth") && vm.count("-resolution"))
   {
     PCL_ERROR ("Both -depth and -resolution specified, please specify one (Mutually exclusive)\n");
   }
+
   // Just resolution specified (Update how we build the tree)
-  else if (find_switch (argc, argv, "-resolution"))
+  else if (vm.count("resolution"))
   {
     build_octree_with = OCTREE_RESOLUTION;
+    resolution = vm["resolution"].as<float>();
   }
 
   // Parse options
-  parse_argument (argc, argv, "-depth", depth);
-  parse_argument (argc, argv, "-resolution", resolution);
-  gen_lod = find_switch (argc, argv, "-gen_lod");
-  overwrite = find_switch (argc, argv, "-overwrite");
+  if (vm.count("depth") ) depth = vm["depth"].as<int>() ;
+  gen_lod =vm.count("gen_lod");
+  overwrite = vm.count("overwrite");
 
   // Parse non-option arguments for pcd files
-  std::vector<int> file_arg_indices = parse_file_extension_argument (argc, argv, ".pcd");
+  std::vector<std::string> file_names = vm["input"].as<std::vector<std::string> >();
 
   std::vector<boost::filesystem::path> pcd_paths;
-  for (size_t i = 0; i < file_arg_indices.size (); i++)
+  for (size_t i = 0; i < file_names.size (); i++)
   {
-    boost::filesystem::path pcd_path (argv[file_arg_indices[i]]);
-    if (!boost::filesystem::exists (pcd_path))
+    if (!boost::filesystem::exists (file_names[i]))
     {
-      PCL_WARN ("File %s doesn't exist", pcd_path.string ().c_str ());
+      PCL_WARN ("File %s doesn't exist", file_names[i].c_str ());
       continue;
     }
-    pcd_paths.push_back (pcd_path);
+    pcd_paths.push_back (file_names[i]);
 
   }
 
@@ -312,20 +309,20 @@ main (int argc, char* argv[])
   }
 
   // Get root directory
-  boost::filesystem::path root_dir (argv[argc - 1]);
+  boost::filesystem::path root_dir ( vm["output"].as<std::string>() );
 
   // Check if a root directory was specified, use directory of pcd file
   if (root_dir.extension () == ".pcd")
     root_dir = root_dir.parent_path () / (root_dir.stem().string() + "_tree").c_str();
 
-if (find_switch(argc, argv, "-C") ){
-    return outofcoreProcess<pcl::PointXYZRGBA>(pcd_paths, root_dir, depth, resolution, build_octree_with, gen_lod, overwrite);
+if (vm.count("color")){
+  //  return outofcoreProcess<pcl::PointXYZRGBA>(pcd_paths, root_dir, depth, resolution, build_octree_with, gen_lod, overwrite);
 }
-if (find_switch(argc, argv, "-I") ){
-    return outofcoreProcess<pcl::PointXYZI>(pcd_paths, root_dir, depth, resolution, build_octree_with, gen_lod, overwrite);
+if ( vm.count("intensity") ){
+  //  return outofcoreProcess<pcl::PointXYZI>(pcd_paths, root_dir, depth, resolution, build_octree_with, gen_lod, overwrite);
 }
-if ( find_switch(argc, argv, "-L") ){
-	  return outofcoreProcess<pcl::PointXYZL>(pcd_paths, root_dir, depth, resolution, build_octree_with, gen_lod, overwrite);
+if ( vm.count("label") ){
+	 // return outofcoreProcess<pcl::PointXYZL>(pcd_paths, root_dir, depth, resolution, build_octree_with, gen_lod, overwrite);
 }
 	  return outofcoreProcess<pcl::PointXYZ>(pcd_paths, root_dir, depth, resolution, build_octree_with, gen_lod, overwrite);
 }

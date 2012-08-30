@@ -99,6 +99,7 @@ namespace osgpcl
 
 
     if (coptions->isLeaf()){
+      std::cout << "Loaded leaf at depth " << coptions->getDepth() << " \n";
       sensor_msgs::PointCloud2::Ptr cloud(new sensor_msgs::PointCloud2);
       if (coptions->getSamplingRate() > 0.999){
         coptions->getOctree()->queryBBIncludes(coptions->getBBmin()._v, coptions->getBBmax()._v,coptions->getDepth(), cloud);

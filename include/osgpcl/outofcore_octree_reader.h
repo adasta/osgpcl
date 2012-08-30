@@ -47,8 +47,7 @@ namespace osgpcl
   template<typename PointT>
   class OutofCoreOctreeT : public OutOfCoreOctree{
     public:
-      typedef pcl::outofcore::octree_base<pcl::outofcore::octree_disk_container<PointT> , PointT> Octree;
-      typedef pcl::outofcore::octree_base_node<pcl::outofcore::octree_disk_container<PointT> , PointT> octree_disk_node;
+      typedef pcl::outofcore::OutofcoreOctreeBase<pcl::outofcore::OutofcoreOctreeDiskContainer<PointT> , PointT> Octree;
       typedef boost::shared_ptr<Octree> OctreePtr;
       typedef boost::shared_ptr<OutofCoreOctreeT<PointT> > Ptr;
 
@@ -66,7 +65,7 @@ namespace osgpcl
       virtual boost::uint64_t getTreeDepth() const { return octree_->getDepth();};
       virtual void getBoundingBox(  double * min,   double * max){
         Eigen::Vector3d bmin, bmax;
-        octree_->getBB(bmin,  bmax );
+        octree_->getBoundingBox(bmin,  bmax );
         for(int i=0;i<3; i++) {min[i]=bmin[i]; max[i]=bmax[i];}
       }
 
