@@ -16,6 +16,9 @@
 #include <boost/assign/std/vector.hpp>
 #include <osg/PagedLOD>
 
+#include <osg/Geode>
+#include <osg/ShapeDrawable>
+
 using namespace boost::assign;
 
 namespace osgpcl
@@ -126,50 +129,53 @@ namespace osgpcl
 
     float child_rad = sh.length()/2;
      int cdepth = coptions->getDepth()+1;
-    if (cdepth >= coptions->getMaxDepth()) return lod.get();
 
-    osg::Group* group = new osg::Group;
+     bool build_children =true;
+    if (cdepth >= coptions->getMaxDepth()) build_children = false;
 
-    for(int i=0; i<8; i++){
-      //todo add some way to check the number of points within a bounding box without actually retrieving them
-      osg::PagedLOD* clod = new osg::PagedLOD;
+    if (build_children) {
+      osg::Group* group = new osg::Group;
 
-      OutOfCoreOptions* child_opts = new OutOfCoreOptions(*coptions, osg::CopyOp::DEEP_COPY_ALL);
+      for(int i=0; i<8; i++){
+        //todo add some way to check the number of points within a bounding box without actually retrieving them
+        osg::PagedLOD* clod = new osg::PagedLOD;
 
-      osg::Vec3d vmax = minbbs[i]+sh;
-      osg::Vec3d ccenter = (vmax+ minbbs[i])/2.0f;
-      child_opts->setBoundingBox( minbbs[i],  minbbs[i]+sh);
-      child_opts->setDepth(cdepth, coptions->getMaxDepth());
+        OutOfCoreOptions* child_opts = new OutOfCoreOptions(*coptions, osg::CopyOp::DEEP_COPY_ALL);
 
-      clod->setFileName(0, fileName);
-      clod->setDatabaseOptions(child_opts);
-      clod->setRange(0,0,child_rad*5.0f);
-      clod->setCenterMode( osg::LOD::USER_DEFINED_CENTER );
-      clod->setCenter( ccenter );
-      clod->setRadius( radius/2.0 );
-      group->addChild(clod);
+        osg::Vec3d vmax = minbbs[i]+sh;
+        osg::Vec3d ccenter = (vmax+ minbbs[i])/2.0f;
+        child_opts->setBoundingBox( minbbs[i],  minbbs[i]+sh);
+        child_opts->setDepth(cdepth, coptions->getMaxDepth());
+
+        clod->setFileName(0, fileName);
+        clod->setDatabaseOptions(child_opts);
+        clod->setRange(0,0,child_rad*5.0f);
+        clod->setCenterMode( osg::LOD::USER_DEFINED_CENTER );
+        clod->setCenter( ccenter );
+        clod->setRadius( radius/2.0 );
+        group->addChild(clod);
+      }
+      if (! lod->addChild(group,0, child_rad*5)){
+        std::cout << "Failed to add group \n";
+      }
     }
 
-    if (! lod->addChild(group,0, child_rad*5)){
-      std::cout << "Failed to add group \n";
-    }
-
-
+    int rep_id = (build_children) ?  1 :0;
     {
       OutOfCoreOptions* child_opts = new OutOfCoreOptions(*coptions, osg::CopyOp::DEEP_COPY_ALL);
       child_opts->setLeaf(true);
       lod->setDatabaseOptions( child_opts);
-      lod->setFileName(1, fileName);
+      lod->setFileName(rep_id, fileName);
     }
     if(coptions->isRoot()){
-      lod->setRange(1,  radius, FLT_MAX);
+      lod->setRange(rep_id,  radius, FLT_MAX);
         coptions->setRoot(false);
     }
     else{
       if (coptions->getDepth() == coptions->getMaxDepth()){
-        lod->setRange(1, 0 , radius*5);
+        lod->setRange(rep_id, 0 , radius*5);
       }
-      else  lod->setRange(1, radius/2 , radius*5);
+      else  lod->setRange(rep_id, radius/2 , radius*5);
     }
     return lod.get();
   }

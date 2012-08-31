@@ -41,6 +41,9 @@ namespace osgpcl
 
      virtual  void queryBBIncludes_subsample (const double min[3], const double max[3], size_t query_depth,
          float subsample, const sensor_msgs::PointCloud2::Ptr& dst_blob) const =0;
+     virtual void
+     getVoxelCenters(std::vector<Eigen::Vector3d, Eigen::aligned_allocator<Eigen::Vector3d> > &voxel_centers, size_t query_depth) const=0;
+
   };
 
 
@@ -56,6 +59,8 @@ namespace osgpcl
                const sensor_msgs::PointCloud2::Ptr& dst_blob) const;
       virtual  void queryBBIncludes_subsample (const double min[3], const double max[3], size_t query_depth,
           float subsample, const sensor_msgs::PointCloud2::Ptr& dst_blob) const;
+
+
     protected:
       OctreePtr octree_;
       typedef Eigen::Map<const Eigen::Vector3d> ConstVec3dMap;
@@ -67,6 +72,10 @@ namespace osgpcl
         Eigen::Vector3d bmin, bmax;
         octree_->getBoundingBox(bmin,  bmax );
         for(int i=0;i<3; i++) {min[i]=bmin[i]; max[i]=bmax[i];}
+      }
+      void
+      getVoxelCenters(std::vector<Eigen::Vector3d, Eigen::aligned_allocator<Eigen::Vector3d> > &voxel_centers, size_t query_depth) const{
+        octree_->getVoxelCenters( voxel_centers,  query_depth);
       }
 
   };

@@ -216,6 +216,12 @@ outofcoreProcess (std::vector<boost::filesystem::path> pcd_paths, boost::filesys
   print_info ("  Depth: %i\n", outofcore_octree->getDepth ());
   print_info ("  Resolution: [%f, %f]\n", x, y);
 
+  for(int i=0; i< outofcore_octree->getDepth(); i++){
+    std::vector<Eigen::Vector3d, Eigen::aligned_allocator<Eigen::Vector3d> > vcenters;
+    outofcore_octree->getVoxelCenters(vcenters, i);
+    std::cout <<"Depth " << i << " has  " << vcenters.size() << " \n";
+  }
+
   //free outofcore data structure; the destructor forces buffer flush to disk
   delete outofcore_octree;
 
