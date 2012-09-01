@@ -46,8 +46,8 @@
 #include <pcl/console/print.h>
 #include <pcl/console/parse.h>
 
-#include <pcl/outofcore/outofcore.h>
-#include <pcl/outofcore/outofcore_impl.h>
+#include <osgpcl/outofcore.h>
+#include <osgpcl/outofcore_impl.h>
 
 #include <boost/program_options.hpp>
 namespace po=boost::program_options;

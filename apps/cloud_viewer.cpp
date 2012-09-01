@@ -23,6 +23,7 @@ int main(int argc, char** argv){
     ("input,i",po::value<std::vector<std::string> >(&infiles)->multitoken()->required(), "input point cloud ")
     ("sampling_rate,s", po::value<float>(), "randomly subsample the input cloud")
     ("color,C",  "Render point cloud using RGB field")
+    ("range,r", po::value<std::string>()->default_value("z"), "Render point cloud using field range.  specify the field")
     ;
 
   po::positional_options_description p;
@@ -50,6 +51,13 @@ int main(int argc, char** argv){
    options->setFactory( new osgpcl::PointCloudRGBFactory<pcl::PointXYZ, pcl::RGB>());
    pcl::console::print_info("Using RGB Field for Rendering...\n");
  }
+ if (vm.count("range")){
+	 std::string field = vm["range"].as<std::string>();
+
+   options->setFactory( new osgpcl::PointCloudCRangeFactory<pcl::PointXYZ, pcl::PointXYZ>(field));
+   pcl::console::print_info("Using %s for Rendering...\n", field.c_str());
+ }
+
 
 osgViewer::Viewer viewer;
 viewer.setUpViewInWindow(0,0,500,500,0);
@@ -57,11 +65,12 @@ viewer.setUpViewInWindow(0,0,500,500,0);
 osgDB::Registry::instance()->addReaderWriter(new osgpcl::PointCloudReader);
 osgDB::Registry::instance()->addReaderWriter(new osgpcl::OutofCoreOctreeReader);
 
-
+osg::Group * group = new osg::Group;
 for(int i=0; i< infiles.size(); i++) {
   pcl::console::print_info("Loading :  %s \n", infiles[i].c_str());
-  viewer.setSceneData( osgDB::readNodeFile(infiles[i], options));
+  group->addChild(osgDB::readNodeFile(infiles[i], options));
 }
+viewer.setSceneData(group);
 viewer.getCamera()->setClearColor( osg::Vec4(0,0,0,1));
 return viewer.run();
 

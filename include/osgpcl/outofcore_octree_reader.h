@@ -15,7 +15,7 @@
 #include <osgDB/Options>
 #include <osgDB/Registry>
 
-#include <pcl/outofcore/outofcore.h>
+#include <osgpcl/outofcore.h>
 
 #include <boost/random.hpp>
 #include <boost/random/mersenne_twister.hpp>
