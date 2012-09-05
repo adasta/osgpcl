@@ -11,6 +11,20 @@
 #include <osgpcl/point_cloud.h>
 
 namespace osgpcl{
+template<typename PointT, typename  NormalT, typename RadiusT>
+	class SurfelFactoryFF : public  PointCloudFactory{
+	public:
+		SurfelFactoryFF();
+		~SurfelFactoryFF(){}
+		using PointCloudFactory::setInputCloud;
+
+		virtual void setInputCloud(const sensor_msgs::PointCloud2::ConstPtr& cloud);
+
+		virtual PointCloudGeometry* buildGeometry(bool unique_state =false)const ;
+	private:
+		Eigen::MatrixXf circle_cache;
+	};
+
 	template<typename PointT, typename  NormalT>
 	class SurfelFactory : public  PointCloudFactory{
 	public:
