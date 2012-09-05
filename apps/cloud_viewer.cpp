@@ -1,7 +1,9 @@
 #include <osgpcl/common.h>
 
+
 #include <osgpcl/point_cloud_reader.h>
 #include <osgpcl/outofcore_octree_reader.h>
+#include <osgpcl/surfel.h>
 
 #include <osgViewer/Viewer>
 #include <osgDB/ReadFile>
@@ -24,6 +26,7 @@ int main(int argc, char** argv){
     ("sampling_rate,s", po::value<float>(), "randomly subsample the input cloud")
     ("color,C",  "Render point cloud using RGB field")
     ("range,r", po::value<std::string>()->default_value("z"), "Render point cloud using field range.  specify the field")
+    ("surfel,S", po::value<float>(), "Render point cloud a surfel disk of radius X")
     ;
 
   po::positional_options_description p;
@@ -57,6 +60,12 @@ int main(int argc, char** argv){
    options->setFactory( new osgpcl::PointCloudCRangeFactory<pcl::PointXYZ, pcl::PointXYZ>(field));
    pcl::console::print_info("Using %s for Rendering...\n", field.c_str());
  }
+ if (vm.count("surfel")){
+	 float radius = vm["surfel"].as<float>();
+   options->setFactory( new osgpcl::SurfelFactory<pcl::PointXYZ, pcl::Normal>(radius));
+   pcl::console::print_info("Using SurfelFactory %f m radius for Rendering...\n", radius);
+ }
+
 
 
 osgViewer::Viewer viewer;

@@ -43,7 +43,9 @@ ${Boost_LIBRARIES}
 
 
 add_library(osgpcl src/point_cloud.cpp 
-				   src/common.cpp  )
+				   src/common.cpp
+				   src/surfel.cpp  
+				   )
 target_link_libraries(osgpcl debug ${OSGPCL_DEP_LIBRARIES})
 
 add_library(osgdb_oct_idx  src/outofcore_octree_reader.cpp)

@@ -42,11 +42,10 @@ namespace osgpcl
 
     //  void setInputIndices(const pcl::IndicesConstPtr& indices);
 
-      osg::Node * buildNode();
+      virtual osg::Node * buildNode();
 
     private:
       std::map<std::string, boost::any> input_clouds_;
-     // pcl::IndicesConstPtr indices_;
 
     public:
       template<typename PointT>
@@ -57,8 +56,13 @@ namespace osgpcl
       virtual void setInputCloud(const sensor_msgs::PointCloud2::ConstPtr& cloud)=0;
       void clearInput(){input_clouds_.clear();}
 
+      void setIndices( const pcl::IndicesConstPtr& indices){
+    	  indices_ = indices;
+      }
+
     protected:
       osg::ref_ptr<osg::StateSet> stateset_;
+      pcl::IndicesConstPtr indices_;
 
       template<typename PointT>
       typename pcl::PointCloud<PointT>::ConstPtr getInputCloud() const ;
