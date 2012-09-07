@@ -198,7 +198,7 @@ outofcoreProcess (std::vector<boost::filesystem::path> pcd_paths, boost::filesys
     }
     else
     {
-      pts = outofcore_octree->addPointCloud (cloud, true);
+      pts = outofcore_octree->addPointCloud (cloud, false);
     }
 
     print_info ("Successfully added %lu points\n", pts);
@@ -247,6 +247,7 @@ main (int argc, char* argv[])
       ("color,C" , "Use PointXYZRGB")
       ("label,L" , "Use PointXYZL")
       ("intensity,I" , "Use PointXYZI")
+      ("normal,N" , "Use Normal Field")
       ;
 
 
@@ -321,14 +322,18 @@ main (int argc, char* argv[])
   if (root_dir.extension () == ".pcd")
     root_dir = root_dir.parent_path () / (root_dir.stem().string() + "_tree").c_str();
 
+  if ( vm.count("intensity")  && vm.count("normal")){
+      return outofcoreProcess<pcl::PointXYZINormal>(pcd_paths, root_dir, depth, resolution, build_octree_with, gen_lod, overwrite);
+  }
+
 if (vm.count("color")){
-  //  return outofcoreProcess<pcl::PointXYZRGBA>(pcd_paths, root_dir, depth, resolution, build_octree_with, gen_lod, overwrite);
+   return outofcoreProcess<pcl::PointXYZRGBA>(pcd_paths, root_dir, depth, resolution, build_octree_with, gen_lod, overwrite);
 }
 if ( vm.count("intensity") ){
-  //  return outofcoreProcess<pcl::PointXYZI>(pcd_paths, root_dir, depth, resolution, build_octree_with, gen_lod, overwrite);
+    return outofcoreProcess<pcl::PointXYZI>(pcd_paths, root_dir, depth, resolution, build_octree_with, gen_lod, overwrite);
 }
 if ( vm.count("label") ){
-	 // return outofcoreProcess<pcl::PointXYZL>(pcd_paths, root_dir, depth, resolution, build_octree_with, gen_lod, overwrite);
+	return outofcoreProcess<pcl::PointXYZL>(pcd_paths, root_dir, depth, resolution, build_octree_with, gen_lod, overwrite);
 }
 	  return outofcoreProcess<pcl::PointXYZ>(pcd_paths, root_dir, depth, resolution, build_octree_with, gen_lod, overwrite);
 }
