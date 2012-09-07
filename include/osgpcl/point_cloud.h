@@ -132,7 +132,7 @@ namespace osgpcl
   template<typename PointTXYZ, typename IntensityT>
   class PointCloudIFactory : public PointCloudFactory {
     public:
-      virtual PointCloudGeometry* buildGeometry() const;
+      virtual PointCloudGeometry* buildGeometry(bool unique_stateset=false) const;
       virtual void setInputCloud(const sensor_msgs::PointCloud2::ConstPtr& cloud);
       using PointCloudFactory::setInputCloud;
 

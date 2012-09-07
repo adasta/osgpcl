@@ -26,7 +26,9 @@ int main(int argc, char** argv){
     ("input,i",po::value<std::vector<std::string> >(&infiles)->multitoken()->required(), "input point cloud ")
     ("sampling_rate,s", po::value<float>(), "randomly subsample the input cloud")
     ("color,C",  "Render point cloud using RGB field")
-    ("range,r", po::value<std::string>(), "Render point cloud using field range.  specify the field")
+    ("intensity,I",  "Render point cloud using intensity field")
+    ("label,L",  "Render point cloud using label field")
+    ("range,R", po::value<std::string>(), "Render point cloud using field range.  specify the field")
     ("disk,D", po::value<float>(), "Render point cloud a surfel disk of radius X")
     ("surfel,S", "Render surfel point cloud ")
     ;
@@ -55,6 +57,14 @@ int main(int argc, char** argv){
  if (vm.count("color")){
    options->setFactory( new osgpcl::PointCloudRGBFactory<pcl::PointXYZ, pcl::RGB>());
    pcl::console::print_info("Using RGB Field for Rendering...\n");
+ }
+ if (vm.count("intensity")){
+   options->setFactory( new osgpcl::PointCloudIFactory<pcl::PointXYZ, pcl::Intensity>());
+   pcl::console::print_info("Using Intensity Field for Rendering...\n");
+ }
+ if (vm.count("label")){
+   options->setFactory( new osgpcl::PointCloudLabelFactory<pcl::PointXYZ, pcl::Label>());
+   pcl::console::print_info("Using Label Field for Rendering...\n");
  }
  if (vm.count("range")){
 	 std::string field = vm["range"].as<std::string>();
@@ -85,7 +95,7 @@ for(int i=0; i<infiles.size(); i++) {
   pcl::console::print_info("Loading :  %s \n", infiles[i].c_str());
   group->addChild(osgDB::readNodeFile(infiles[i], options));
 }
-
+/*
 //Shader source for normal image rendering
 const char vertex_shader_src[] ="#version 130\n"
  "varying vec3 normal;\n"
@@ -97,17 +107,6 @@ const char vertex_shader_src[] ="#version 130\n"
      "varying vec3 normal;\n"
      "void main(void){\n"
      "\n gl_FragColor  = vec4(normal/2.0+0.5,1);}\n";
-/*
- const char fragment_shader_src[] =  "#version 130\n"
-      "varying vec3 normal;\n"
-      "void main(void){\n"
-      "float th= acos( normal[1] )/3.14;\n "
-      "float del= atan(normal[2], normal[0])/6.28 +0.5;\n;"
-      "int di= int(gl_FragCoord.z)*32;\n"
-      "float dl=( di & 0x00ff)/255;\n"
-      "float du=( ( di & 0xff00)>>8 )/255;\n"
-      "\n gl_FragColor  = vec4(th  ,del , dl, du);}\n";
-*/
 
  osg::Program* pgm = new osg::Program;
  pgm->setName( "NormalRendering" );
@@ -119,6 +118,7 @@ const char vertex_shader_src[] ="#version 130\n"
  normal_ss_->setAttribute(pgm);
 
  group->setStateSet( normal_ss_);
+*/
 
 viewer.setSceneData(group);
 viewer.getCamera()->setClearColor( osg::Vec4(0,0,0,1));

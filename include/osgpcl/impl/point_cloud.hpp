@@ -361,13 +361,44 @@ inline void osgpcl::PointCloudCRangeFactory<PointTXYZ, PointTF>::setInputCloud (
   //**************************************** Intensity Point Cloud *******************
 
 template<typename PointTXYZ, typename IntensityT>  osgpcl::PointCloudGeometry*
-osgpcl::PointCloudIFactory<PointTXYZ, IntensityT>::buildGeometry () const
+osgpcl::PointCloudIFactory<PointTXYZ, IntensityT>::buildGeometry (bool unique_stateset) const
   {
+	 typename pcl::PointCloud<PointTXYZ>::ConstPtr xyz = getInputCloud<PointTXYZ>();
+	   typename pcl::PointCloud<IntensityT>::ConstPtr icloud = getInputCloud<IntensityT>();
+	  if  ( (icloud == NULL) || (xyz==NULL) ){
+	    return NULL;
+	  }
+
+	  if ( icloud->points.size() != xyz->points.size() ){
+	    pcl::console::print_error("[PointCloudIntensityFactory]  XYZ and Label Clouds have different # of points.\n");
+	    return NULL;
+	  }
+
+	  //TODO just make this a single grayscale value and make a custom shader program
+	  osg::Vec4Array* colors = new osg::Vec4Array;
+	  colors->reserve(icloud->points.size());
+	  int psize = icloud->points.size();
+
+	  for(int i=0; i<psize; i++){
+	     osg::Vec4f color;
+	     color[0] =color[1]=color[2] = icloud->points[i].intensity*0.8+0.2;
+	     color[3]=1;
+	     colors->push_back(color);
+	  }
+
+	  PointCloudGeometry* geom = new PointCloudGeometry;
+
+	  this->addXYZToVertexBuffer<PointTXYZ>(*geom, *xyz);
+
+	  geom->setColorArray(colors);
+	  geom->setColorBinding(osg::Geometry::BIND_PER_VERTEX);
+	  geom->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
+	  return geom;
   }
 
 
 template<typename PointTXYZ, typename IntensityT>
-inline void osgpcl::PointCloudIFactory<PointTXYZ, IntensityT>::setInputCloud (
+  void osgpcl::PointCloudIFactory<PointTXYZ, IntensityT>::setInputCloud (
     const sensor_msgs::PointCloud2::ConstPtr& cloud)
 {
   typename pcl::PointCloud<PointTXYZ>::Ptr xyz(new pcl::PointCloud<PointTXYZ>);
@@ -436,11 +467,12 @@ inline osgpcl::PointCloudGeometry* osgpcl::PointCloudLabelFactory<PointTXYZ, Lab
   srand(time(NULL));
   for(int i=0; i<psize; i++){
    ColorMap::iterator iter =  cmap.find( lcloud->points[i].label);
-   if (iter ==  color_map_.end()){
+   if (iter ==  cmap.end()){
      osg::Vec4f color;
-    if (random_coloring_)
-      for(int i=0; i<3; i++) color[i] = (  (float) (rand()%900) )/900.0f +0.1;
-    else color = osg::Vec4f(0,0,0,1);
+    if (random_coloring_){
+        for(int i=0; i<3; i++) color[i] = (  (float) (rand()%900) )/900.0f +0.1;
+    }
+    else { color = osg::Vec4f(0,0,0,1); }
      color[3]=1;
      cmap[lcloud->points[i].label] = color;
      colors->push_back(color);
@@ -451,7 +483,6 @@ inline osgpcl::PointCloudGeometry* osgpcl::PointCloudLabelFactory<PointTXYZ, Lab
   }
 
   PointCloudGeometry* geom = new PointCloudGeometry;
-
   this->addXYZToVertexBuffer<PointTXYZ>(*geom, *xyz);
 
   geom->setColorArray(colors);
