@@ -23,14 +23,19 @@ Usage:
 To force color rendering (needed for out of core viewing) use 
 cloud_viewer -C 
 
-
 You can find a large example point cloud to try at:
 https://www.dropbox.com/s/djiey6b4jnc5dv0/chappes.pcd
 
-The same cloud as an out of core cloud :
-https://www.dropbox.com/s/7hdhhcr0ez9fohb/chappes_tree.tar.gz
+To view the full point cloud in color, simply use 
 
-Use "cloud_viewer -c chappes_tree/tree.oct_idx" to view in color.
+cloud_viewer -C chappes.pcd
+
+You can generate an out of core point cloud from this large point cloud
+via 
+
+pcl_outofcore_process -gen_lod chappes.pcd chappes_tree
+
+Then use "cloud_viewer -C chappes_tree/tree.oct_idx" to view in color.
 
 This is the Chappes Cathedral Dataset courtesy of Prof. Peter Allen, 
 Columbia University Robotics Lab. Scanning by Alejandro Troccoli
