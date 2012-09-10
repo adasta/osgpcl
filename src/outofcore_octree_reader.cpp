@@ -91,7 +91,7 @@ namespace osgpcl
       fact->setRange(coptions->getBBmin()[2], coptions->getBBmax()[2]);
       coptions->setFactory(fact);
     }
- //   std::cout << "Loading " << coptions->getDepth() << " : ";
+   // std::cout << "Loading " << coptions->getDepth() << " \n";
  //   printBB(std::cout, *coptions);
 
     const osg::Vec3d & bbmin =coptions->getBBmin();
@@ -102,7 +102,7 @@ namespace osgpcl
 
 
     if (coptions->isLeaf()){
-      std::cout << "Loaded leaf at depth " << coptions->getDepth() << " \n";
+   //   std::cout << "Loaded leaf at depth " << coptions->getDepth() << " \n";
       sensor_msgs::PointCloud2::Ptr cloud(new sensor_msgs::PointCloud2);
       if (coptions->getSamplingRate() > 0.999){
         coptions->getOctree()->queryBBIncludes(coptions->getBBmin()._v, coptions->getBBmax()._v,coptions->getDepth(), cloud);
@@ -266,6 +266,7 @@ namespace osgpcl
     this->factory_ = options.factory_;
     this->sampling_rate_ = options.sampling_rate_;
     this->isLeaf_ = options.isLeaf_;
+    this->depth_set_ = options.depth_set_;
   }
 
   void OutofCoreOctreeReader::OutOfCoreOptions::getBoundingBox (

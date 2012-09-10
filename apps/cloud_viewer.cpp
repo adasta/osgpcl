@@ -25,11 +25,11 @@ int main(int argc, char** argv){
     ("help", "produce help message")
     ("input,i",po::value<std::vector<std::string> >(&infiles)->multitoken()->required(), "input point cloud ")
     ("sampling_rate,s", po::value<float>(), "randomly subsample the input cloud")
+    ("depth,d", po::value<int>(), "octree depth to visualize")
     ("color,C",  "Render point cloud using RGB field")
     ("intensity,I",  "Render point cloud using intensity field")
     ("label,L",  "Render point cloud using label field")
     ("range,R", po::value<std::string>(), "Render point cloud using field range.  specify the field")
-    ("disk,D", po::value<float>(), "Render point cloud a surfel disk of radius X")
     ("surfel,S", "Render surfel point cloud ")
     ;
 
@@ -49,40 +49,45 @@ int main(int argc, char** argv){
      return 1;
  }
 
+ osg::ref_ptr<osgpcl::PointCloudFactory> factory;
+
+
+ if (vm.count("color")){
+	 factory =  new osgpcl::PointCloudRGBFactory<pcl::PointXYZ, pcl::RGB>() ;
+   pcl::console::print_info("Using RGB Field for Rendering...\n");
+ }
+ else if (vm.count("intensity")){
+	 factory =  new osgpcl::PointCloudIFactory<pcl::PointXYZ, pcl::Intensity>() ;
+   pcl::console::print_info("Using Intensity Field for Rendering...\n");
+ }
+ else if (vm.count("label")){
+	 factory =   new osgpcl::PointCloudLabelFactory<pcl::PointXYZ, pcl::Label>() ;
+   pcl::console::print_info("Using Label Field for Rendering...\n");
+ }
+ else if (vm.count("range")){
+	 std::string field = vm["range"].as<std::string>();
+	 factory =   new osgpcl::PointCloudCRangeFactory<pcl::PointXYZ, pcl::PointXYZ>(field) ;
+   pcl::console::print_info("Using %s for Rendering...\n", field.c_str());
+ }
+ else if (vm.count("surfel")){
+	 factory =  new osgpcl::SurfelFactoryFF<pcl::PointXYZ, pcl::Normal, osgpcl::RadiusPointT>() ;
+   pcl::console::print_info("Using SurfelFactoryFF   for Rendering...\n");
+ }
+
  osg::ref_ptr< osgpcl::CloudReaderOptions>  options = new osgpcl::CloudReaderOptions;
+
+ if (vm.count("depth")){
+	 osgpcl::OutofCoreOctreeReader::OutOfCoreOptions * opts = new osgpcl::OutofCoreOctreeReader::OutOfCoreOptions;
+	 opts->setDepth(vm["depth"].as<int>(), vm["depth"].as<int>());
+	 options = opts;
+   pcl::console::print_info("Loading octree at depth %d\n", vm["depth"].as<int>());
+ }
 
  if( vm.count("sampling_rate")){
    options->setSamplingRate(vm["sampling_rate"].as<float>() );
  }
- if (vm.count("color")){
-   options->setFactory( new osgpcl::PointCloudRGBFactory<pcl::PointXYZ, pcl::RGB>());
-   pcl::console::print_info("Using RGB Field for Rendering...\n");
- }
- if (vm.count("intensity")){
-   options->setFactory( new osgpcl::PointCloudIFactory<pcl::PointXYZ, pcl::Intensity>());
-   pcl::console::print_info("Using Intensity Field for Rendering...\n");
- }
- if (vm.count("label")){
-   options->setFactory( new osgpcl::PointCloudLabelFactory<pcl::PointXYZ, pcl::Label>());
-   pcl::console::print_info("Using Label Field for Rendering...\n");
- }
- if (vm.count("range")){
-	 std::string field = vm["range"].as<std::string>();
 
-   options->setFactory( new osgpcl::PointCloudCRangeFactory<pcl::PointXYZ, pcl::PointXYZ>(field));
-   pcl::console::print_info("Using %s for Rendering...\n", field.c_str());
- }
- if (vm.count("disk")){
-	 float radius = vm["disk"].as<float>();
-   options->setFactory( new osgpcl::SurfelFactory<pcl::PointXYZ, pcl::Normal>(radius));
-   pcl::console::print_info("Using SurfelFactory %f m radius for Rendering...\n", radius);
- }
- if (vm.count("surfel")){
-   options->setFactory( new osgpcl::SurfelFactoryFF<pcl::PointXYZ, pcl::Normal, osgpcl::RadiusPointT>());
-   pcl::console::print_info("Using SurfelFactoryFF   for Rendering...\n");
- }
-
-
+ options->setFactory(factory);
 
 osgViewer::Viewer viewer;
 viewer.setUpViewInWindow(0,0,500,500,0);
