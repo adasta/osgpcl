@@ -168,14 +168,14 @@ namespace osgpcl
       lod->setFileName(rep_id, fileName);
     }
     if(coptions->isRoot()){
-      lod->setRange(rep_id,  radius, FLT_MAX);
+      lod->setRange(rep_id,  0, FLT_MAX);
         coptions->setRoot(false);
     }
     else{
       if (coptions->getDepth() == coptions->getMaxDepth()){
         lod->setRange(rep_id, 0 , radius*5);
       }
-      else  lod->setRange(rep_id, radius/2 , radius*5);
+      else  lod->setRange(rep_id, 0, radius*5);
     }
     return lod.get();
   }
