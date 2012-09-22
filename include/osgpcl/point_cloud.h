@@ -165,8 +165,28 @@ namespace osgpcl
       bool random_coloring_;
   };
 
-}
 
+  template<typename PointTXYZ, typename NormalT>
+  class PointCloudNormalFactory: public PointCloudFactory{
+
+    public:
+	  PointCloudNormalFactory();
+
+    virtual PointCloudGeometry* buildGeometry(bool unique_stateset=false) const;
+
+    using PointCloudFactory::setInputCloud;
+    virtual void setInputCloud(const sensor_msgs::PointCloud2::ConstPtr& cloud);
+
+    void setColor(osg::Vec4f color);
+
+    void setNormalLength(float length){ nlength = length;};
+
+    private:
+      osg::Vec4f color_;
+      float nlength;
+  };
+
+}
 
 
 /* namespace osgPCL */

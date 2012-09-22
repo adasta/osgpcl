@@ -57,7 +57,7 @@
     osg::Vec3Array* pts = new osg::Vec3Array;
     pts->reserve(cloud.points.size());
     for(int i=0; i<cloud.points.size(); i++){
-      const pcl::PointXYZ& pt = cloud.points[i];
+      const PointT& pt = cloud.points[i];
       pts->push_back(osg::Vec3(pt.x, pt.y, pt.z));
     }
     geom.setVertexArray( pts );
@@ -525,5 +525,79 @@ inline void osgpcl::PointCloudLabelFactory<PointTXYZ, LabelT>::enableRandomColor
 {
   random_coloring_ = enable;
 }
+
+
+// ********************************* Normal Factory ********************************
+
+
+template<typename PointTXYZ, typename NormalT>
+inline osgpcl::PointCloudNormalFactory<PointTXYZ, NormalT>::PointCloudNormalFactory() {
+    stateset_ = new osg::StateSet;
+
+    osg::Point* p = new osg::Point;
+    p->setSize(4);
+
+    stateset_->setAttribute(p);
+
+    stateset_->setMode( GL_LIGHTING, osg::StateAttribute::OFF );
+
+    nlength = 0.5;
+    color_[0]=1;
+    color_[1]=1;
+    color_[2]=1;
+    color_[3]=1;
+}
+
+template<typename PointTXYZ, typename NormalT>
+inline osgpcl::PointCloudGeometry* osgpcl::PointCloudNormalFactory<PointTXYZ, NormalT>::buildGeometry(
+		bool unique_stateset) const {
+
+	  typename pcl::PointCloud<PointTXYZ>::ConstPtr xyz = getInputCloud<PointTXYZ>();
+	   typename pcl::PointCloud<NormalT>::ConstPtr normals = getInputCloud<NormalT>();
+	  if  ( (normals == NULL) || (xyz==NULL) ){
+	    return NULL;
+	  }
+
+	  if ( normals->points.size() != xyz->points.size() ){
+	    pcl::console::print_error("[PointCloudNormalFactory]  XYZ and Normal Clouds have different # of points.\n");
+	    return NULL;
+	  }
+
+	osg::Geometry* geom = new osg::Geometry;
+    osg::Vec3Array* pts = new osg::Vec3Array;
+    pts->reserve(xyz->points.size());
+    for(int i=0; i<xyz->points.size(); i++){
+      const PointTXYZ& pt = xyz->points[i];
+      pts->push_back(osg::Vec3(pt.x, pt.y, pt.z));
+      Eigen::Vector3f npt = pt.getVector3fMap()+normals->points[i].getNormalVector3fMap()*nlength;
+      pts->push_back( osg::Vec3(npt[0], npt[1], npt[2] ) );
+    }
+    geom->setVertexArray( pts );
+    geom->addPrimitiveSet( new osg::DrawArrays( GL_LINE, 0, pts->size()/2.0 ) );
+    osg::Vec4Array* colors = new osg::Vec4Array;
+    colors->push_back(color_);
+    geom->setColorBinding( osg::Geometry::BIND_PER_PRIMITIVE_SET);
+    return geom;
+}
+
+template<typename PointTXYZ, typename NormalT>
+inline void osgpcl::PointCloudNormalFactory<PointTXYZ, NormalT>::setInputCloud(
+		const sensor_msgs::PointCloud2::ConstPtr& cloud) {
+	  typename pcl::PointCloud<PointTXYZ>::Ptr xyz(new pcl::PointCloud<PointTXYZ>);
+	    pcl::fromROSMsg(*cloud,*xyz);
+	    PointCloudFactory::setInputCloud<PointTXYZ>(xyz);
+
+	    if ( !boost::is_same<PointTXYZ, NormalT>::value){
+	      typename  pcl::PointCloud<NormalT>::Ptr icloud(new pcl::PointCloud<NormalT>);
+	      pcl::fromROSMsg(*cloud,*icloud);
+	      PointCloudFactory::setInputCloud<NormalT>(icloud);
+	    }
+}
+
+template<typename PointTXYZ, typename NormalT>
+inline void osgpcl::PointCloudNormalFactory<PointTXYZ, NormalT>::setColor(
+		osg::Vec4f color) {
+	color_ = color;
+ }
 
 #endif /* POINT_CLOUD_HPP_ */
