@@ -57,6 +57,15 @@ target_link_libraries(osgdb_pcd osgpcl ${OSGPCL_DEP_LIBRARIES})
 add_executable(cloud_viewer apps/cloud_viewer.cpp)
 target_link_libraries(cloud_viewer osgpcl ${OSGPCL_DEP_LIBRARIES} osgdb_pcd osgdb_oct_idx)
 
+
+INSTALL(TARGETS osgpcl osgdb_oct_idx osgdb_pcd cloud_viewer
+  RUNTIME DESTINATION bin
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+)
+
+INSTALL(DIRECTORY include/osgpcl  DESTINATION include)
+
 #add a directory for throw away programs for testing out code
 if( IS_DIRECTORY "${CMAKE_SOURCE_DIR}/scratch")
 message(STATUS "Adding scratch directory")
