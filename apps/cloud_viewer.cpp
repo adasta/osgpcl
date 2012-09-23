@@ -51,8 +51,12 @@ int main(int argc, char** argv){
 
  osg::ref_ptr<osgpcl::PointCloudFactory> factory;
 
+ if(vm.count("intensity") && vm.count("surfel")){
+	 factory =  new osgpcl::SurfelFactoryI<pcl::PointXYZ, pcl::Normal, pcl::Intensity>(0.03) ;
+   pcl::console::print_info("Using SurfelFactoryI for Rendering...\n");
 
- if (vm.count("color")){
+ }
+ else if (vm.count("color")){
 	 factory =  new osgpcl::PointCloudRGBFactory<pcl::PointXYZ, pcl::RGB>() ;
    pcl::console::print_info("Using RGB Field for Rendering...\n");
  }

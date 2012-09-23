@@ -418,7 +418,7 @@ template<typename PointTXYZ, typename LabelT>
 inline osgpcl::PointCloudLabelFactory<PointTXYZ, LabelT>::PointCloudLabelFactory ()
 {
   //set up a basic color map for consistency on the typical labels used
-  color_map_[0] = osg::Vec4f(0.2,0.2,0.2,1);
+ /* color_map_[0] = osg::Vec4f(0.2,0.2,0.2,1);
   color_map_[1] = osg::Vec4f(0.4,0.1,0.1,1);
   color_map_[2] = osg::Vec4f(0.4,0.4,0.1,1);
   color_map_[3] = osg::Vec4f(0.4,0.1,0.4,1);
@@ -430,7 +430,7 @@ inline osgpcl::PointCloudLabelFactory<PointTXYZ, LabelT>::PointCloudLabelFactory
   color_map_[9] = osg::Vec4f(0.6,0.3,0.3,1);
   color_map_[10] = osg::Vec4f(0.6,0.6,0.3,1);
   color_map_[11] = osg::Vec4f(0.6,0.3,0.6,1);
-  color_map_[12] = osg::Vec4f(0.3,0.6,0.3,1);
+  color_map_[12] = osg::Vec4f(0.3,0.6,0.3,1); */
   random_coloring_ =true;
 
   stateset_ = new osg::StateSet;

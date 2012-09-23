@@ -9,6 +9,7 @@
 #include <osg/Point>
 #include<pcl/point_types.h>
 
+#include <iostream>
 #include <osg/Geode>
 
 namespace osgpcl
@@ -34,7 +35,9 @@ osg::Node* osgpcl::PointCloudFactory::buildNode ()
 {
   osg::Geode* geode = new osg::Geode;
   geode->getDescriptions().push_back("PointCloud");
-  geode->addDrawable(buildGeometry());
+  osg::Geometry * geom = buildGeometry();
+  if (geom ==NULL) std::cout << "Could not build point cloud\n";
+  geode->addDrawable(geom);
   return geode;
 }
 /* namespace osgPCL */
