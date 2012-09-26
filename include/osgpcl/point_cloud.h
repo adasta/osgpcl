@@ -69,6 +69,8 @@ namespace osgpcl
 
       template<typename PointT>
       void addXYZToVertexBuffer( osg::Geometry&, const pcl::PointCloud<pcl::PointXYZ>& cloud) const;
+public:
+      void setPointSize( int size);
   };
 
 

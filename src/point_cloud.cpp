@@ -31,6 +31,12 @@ osgpcl::PointCloudFactory::PointCloudFactory(){
    stateset_->setMode( GL_LIGHTING, osg::StateAttribute::OFF );
 }
 
+void osgpcl::PointCloudFactory:: setPointSize( int size){
+        osg::Point* p = new osg::Point;
+        p->setSize(size);
+        stateset_->setAttribute(p);
+    }
+
 osg::Node* osgpcl::PointCloudFactory::buildNode ()
 {
   osg::Geode* geode = new osg::Geode;

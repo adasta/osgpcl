@@ -108,6 +108,7 @@
          stateset_->setMode( GL_LIGHTING, osg::StateAttribute::OFF );
   }
 
+
   template<typename PointT> osgpcl::PointCloudGeometry*
    osgpcl::PointCloudColoredFactory<PointT>::buildGeometry (bool unique_stateset) const
   {
@@ -392,7 +393,7 @@ osgpcl::PointCloudIFactory<PointTXYZ, IntensityT>::buildGeometry (bool unique_st
 
 	  geom->setColorArray(colors);
 	  geom->setColorBinding(osg::Geometry::BIND_PER_VERTEX);
-	  geom->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
+	  geom->setStateSet(stateset_);
 	  return geom;
   }
 

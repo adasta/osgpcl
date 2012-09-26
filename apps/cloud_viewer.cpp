@@ -26,6 +26,7 @@ int main(int argc, char** argv){
     ("input,i",po::value<std::vector<std::string> >(&infiles)->multitoken()->required(), "input point cloud ")
     ("sampling_rate,s", po::value<float>(), "randomly subsample the input cloud")
     ("depth,d", po::value<int>(), "octree depth to visualize")
+    ("point_size,p", po::value<int>(), "point quad size in pixels")
     ("color,C",  "Render point cloud using RGB field")
     ("intensity,I",  "Render point cloud using intensity field")
     ("label,L",  "Render point cloud using label field")
@@ -91,6 +92,10 @@ int main(int argc, char** argv){
    options->setSamplingRate(vm["sampling_rate"].as<float>() );
  }
 
+
+ if (vm.count("point_size")){
+	 factory->setPointSize(vm["point_size"].as<int>());
+ }
  options->setFactory(factory);
 
 osgViewer::Viewer viewer;
