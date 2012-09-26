@@ -149,13 +149,13 @@ namespace osgpcl
 
         clod->setFileName(0, fileName);
         clod->setDatabaseOptions(child_opts);
-        clod->setRange(0,0,child_rad*5.0f);
+        clod->setRange(0,0,child_rad*2.0f);
         clod->setCenterMode( osg::LOD::USER_DEFINED_CENTER );
         clod->setCenter( ccenter );
         clod->setRadius( radius/2.0 );
         group->addChild(clod);
       }
-      if (! lod->addChild(group,0, child_rad*5)){
+      if (! lod->addChild(group,0, child_rad*2)){
         std::cout << "Failed to add group \n";
       }
     }
@@ -173,9 +173,9 @@ namespace osgpcl
     }
     else{
       if (coptions->getDepth() == coptions->getMaxDepth()){
-        lod->setRange(rep_id, 0 , radius*5);
+        lod->setRange(rep_id, 0 , radius*2);
       }
-      else  lod->setRange(rep_id, 0, radius*5);
+      else  lod->setRange(rep_id, 0, radius*2);
     }
     return lod.get();
   }
