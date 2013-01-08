@@ -6,6 +6,8 @@
 #include <osgpcl/surfel.h>
 #include <osgpcl/utility_point_types.h>
 
+#include <osgGA/FirstPersonManipulator>
+
 #include <osgViewer/Viewer>
 #include <osgDB/ReadFile>
 
@@ -15,6 +17,21 @@
 #include <boost/program_options.hpp>
 namespace po=boost::program_options;
 
+
+class CameraFPManipulator : public  osgGA::FirstPersonManipulator {
+  public:
+
+  CameraFPManipulator () :  osgGA::FirstPersonManipulator(){
+    setWheelMovement(0.1, false);
+  }
+
+  private:
+ // virtual bool handleKeyDown( const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapter& us );
+
+
+};
+
+#include <osgDB/WriteFile>
 
 int main(int argc, char** argv){
   po::options_description desc("./cloud_viewer [options] input ... ");
@@ -32,7 +49,8 @@ int main(int argc, char** argv){
     ("label,L",  "Render point cloud using label field")
     ("range,R", po::value<std::string>(), "Render point cloud using field range.  specify the field")
     ("surfel,S", "Render surfel point cloud ")
-    ;
+    ("flight,F", "use flight camera manipulator ")
+     ;
 
   po::positional_options_description p;
   p.add("input",-1);
@@ -109,33 +127,15 @@ for(int i=0; i<infiles.size(); i++) {
   pcl::console::print_info("Loading :  %s \n", infiles[i].c_str());
   group->addChild(osgDB::readNodeFile(infiles[i], options));
 }
-/*
-//Shader source for normal image rendering
-const char vertex_shader_src[] ="#version 130\n"
- "varying vec3 normal;\n"
- "void main(void) {\n"
- "  gl_Position = gl_ModelViewProjectionMatrix* gl_Vertex;\n"
- "  normal = normalize(gl_NormalMatrix*gl_Normal);} \n";
-
- const char fragment_shader_src[] =  "#version 130\n"
-     "varying vec3 normal;\n"
-     "void main(void){\n"
-     "\n gl_FragColor  = vec4(normal/2.0+0.5,1);}\n";
-
- osg::Program* pgm = new osg::Program;
- pgm->setName( "NormalRendering" );
-
- pgm->addShader( new osg::Shader( osg::Shader::VERTEX,   vertex_shader_src ) );
- pgm->addShader( new osg::Shader( osg::Shader::FRAGMENT, fragment_shader_src ) );
-
- osg::StateSet* normal_ss_ = new osg::StateSet;
- normal_ss_->setAttribute(pgm);
-
- group->setStateSet( normal_ss_);
-*/
 
 viewer.setSceneData(group);
 viewer.getCamera()->setClearColor( osg::Vec4(0,0,0,1));
+
+if (vm.count("flight")){
+  viewer.setCameraManipulator(new  CameraFPManipulator);
+}
+
+
 return viewer.run();
 
 return 0;

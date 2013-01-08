@@ -67,7 +67,7 @@ osgpcl::SurfelFactory<PointT, NormalT>::SurfelFactory(float radius) {
 }
 
 template<typename PointT, typename NormalT>
-osg::Geometry* osgpcl::SurfelFactory<PointT, NormalT>:: buildGeometry(bool unique) const {
+osg::Geometry* osgpcl::SurfelFactory<PointT, NormalT>:: buildGeometry(bool unique)   {
 
     typename pcl::PointCloud<NormalT>::ConstPtr normals = this->getInputCloud<NormalT>();
     typename pcl::PointCloud<PointT>::ConstPtr  xyz = this->getInputCloud<PointT>();
@@ -197,7 +197,7 @@ osgpcl::SurfelFactoryI<PointT, NormalT, IntensityT>::SurfelFactoryI(float radius
 }
 
 template<typename PointT, typename NormalT, typename IntensityT>
-osg::Geometry* osgpcl::SurfelFactoryI<PointT, NormalT, IntensityT>::buildGeometry(bool unique) const {
+osg::Geometry* osgpcl::SurfelFactoryI<PointT, NormalT, IntensityT>::buildGeometry(bool unique)   {
 
     typename pcl::PointCloud<NormalT>::ConstPtr normals = this->getInputCloud<NormalT>();
     typename pcl::PointCloud<PointT>::ConstPtr  xyz = this->getInputCloud<PointT>();
@@ -291,7 +291,7 @@ osgpcl::SurfelFactoryFFI<PointT, NormalT, IntensityT>::SurfelFactoryFFI(float ra
 }
 
 template<typename PointT, typename NormalT, typename IntensityT>
-osg::Geometry* osgpcl::SurfelFactoryFFI<PointT, NormalT, IntensityT>::buildGeometry(bool unique) const {
+osg::Geometry* osgpcl::SurfelFactoryFFI<PointT, NormalT, IntensityT>::buildGeometry(bool unique)   {
 
     typename pcl::PointCloud<NormalT>::ConstPtr normals = this->getInputCloud<NormalT>();
     typename pcl::PointCloud<PointT>::ConstPtr  xyz = this->getInputCloud<PointT>();
@@ -429,7 +429,7 @@ void osgpcl::SurfelFactoryFF<PointT, NormalT, RadiusT>::setInputCloud(
 
 template<typename PointT, typename NormalT, typename RadiusT>
 osgpcl::PointCloudGeometry* osgpcl::SurfelFactoryFF<PointT, NormalT, RadiusT>::buildGeometry(
-        bool unique_state) const {
+        bool unique_state)   {
 
     typename pcl::PointCloud<NormalT>::ConstPtr normals = this->getInputCloud<NormalT>();
     typename pcl::PointCloud<PointT>::ConstPtr  xyz = this->getInputCloud<PointT>();

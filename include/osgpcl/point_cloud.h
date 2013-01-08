@@ -38,7 +38,7 @@ namespace osgpcl
       virtual ~PointCloudFactory(){}
 
 
-      virtual PointCloudGeometry* buildGeometry(bool unique_stateset=false) const =0;
+      virtual PointCloudGeometry* buildGeometry(bool unique_stateset=false) =0;
 
     //  void setInputIndices(const pcl::IndicesConstPtr& indices);
 
@@ -81,7 +81,7 @@ public:
 
     PointCloudColoredFactory();
 
-    virtual PointCloudGeometry* buildGeometry(bool unique_stateset=false) const;
+    virtual PointCloudGeometry* buildGeometry(bool unique_stateset=false)  ;
 
     using PointCloudFactory::setInputCloud;
     virtual void setInputCloud(const sensor_msgs::PointCloud2::ConstPtr& cloud);
@@ -111,7 +111,7 @@ public:
     //void useJETColorTable();
    // void useGreyColorTable();
 
-    virtual PointCloudGeometry* buildGeometry(bool unique_stateset=false) const;
+    virtual PointCloudGeometry* buildGeometry(bool unique_stateset=false)  ;
     void setPointSize(int size);
     virtual void setInputCloud(const sensor_msgs::PointCloud2::ConstPtr& cloud);
     using PointCloudFactory::setInputCloud;
@@ -125,7 +125,7 @@ public:
   template<typename PointTXYZ=pcl::PointXYZ, typename RGBT=pcl::RGB>
   class PointCloudRGBFactory : public PointCloudFactory {
     public:
-    virtual PointCloudGeometry* buildGeometry(bool unique_stateset=false) const;
+    virtual PointCloudGeometry* buildGeometry(bool unique_stateset=false)  ;
     virtual void setInputCloud(const sensor_msgs::PointCloud2::ConstPtr& cloud);
     using PointCloudFactory::setInputCloud;
 
@@ -134,7 +134,7 @@ public:
   template<typename PointTXYZ, typename IntensityT>
   class PointCloudIFactory : public PointCloudFactory {
     public:
-      virtual PointCloudGeometry* buildGeometry(bool unique_stateset=false) const;
+      virtual PointCloudGeometry* buildGeometry(bool unique_stateset=false)  ;
       virtual void setInputCloud(const sensor_msgs::PointCloud2::ConstPtr& cloud);
       using PointCloudFactory::setInputCloud;
 
@@ -147,7 +147,7 @@ public:
     public:
     PointCloudLabelFactory();
 
-    virtual PointCloudGeometry* buildGeometry(bool unique_stateset=false) const;
+    virtual PointCloudGeometry* buildGeometry(bool unique_stateset=false)  ;
 
     using PointCloudFactory::setInputCloud;
     virtual void setInputCloud(const sensor_msgs::PointCloud2::ConstPtr& cloud);
@@ -174,7 +174,7 @@ public:
     public:
 	  PointCloudNormalFactory();
 
-    virtual PointCloudGeometry* buildGeometry(bool unique_stateset=false) const;
+    virtual PointCloudGeometry* buildGeometry(bool unique_stateset=false)  ;
 
     using PointCloudFactory::setInputCloud;
     virtual void setInputCloud(const sensor_msgs::PointCloud2::ConstPtr& cloud);

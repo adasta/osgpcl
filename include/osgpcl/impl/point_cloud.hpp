@@ -110,7 +110,7 @@
 
 
   template<typename PointT> osgpcl::PointCloudGeometry*
-   osgpcl::PointCloudColoredFactory<PointT>::buildGeometry (bool unique_stateset) const
+   osgpcl::PointCloudColoredFactory<PointT>::buildGeometry (bool unique_stateset)
   {
       typename pcl::PointCloud<PointT>::ConstPtr cloud = getInputCloud<PointT>();
       if (cloud ==NULL) return NULL;
@@ -152,7 +152,7 @@ osgpcl::PointCloudColoredFactory<PointT>::setInputCloud (
 // *************************************** PointCloudRGBFactory *************************
   template<typename PointTXYZ, typename RGBT> osgpcl::PointCloudGeometry*
   osgpcl::PointCloudRGBFactory<PointTXYZ, RGBT>::buildGeometry (
-      bool unique_stateset) const
+      bool unique_stateset)
   {
     osgpcl::PointCloudGeometry* geom(new PointCloudGeometry);
 
@@ -257,7 +257,7 @@ inline void osgpcl::PointCloudCRangeFactory<PointTXYZ, PointTF>::setColorTable (
 
 template<typename PointTXYZ, typename PointTF> osgpcl::PointCloudGeometry*
 osgpcl::PointCloudCRangeFactory<PointTXYZ, PointTF>::buildGeometry (
-      bool unique_stateset) const
+      bool unique_stateset)
 {
 
   typename pcl::PointCloud<PointTXYZ>::ConstPtr xyz = getInputCloud<PointTXYZ>();
@@ -362,7 +362,7 @@ inline void osgpcl::PointCloudCRangeFactory<PointTXYZ, PointTF>::setInputCloud (
   //**************************************** Intensity Point Cloud *******************
 
 template<typename PointTXYZ, typename IntensityT>  osgpcl::PointCloudGeometry*
-osgpcl::PointCloudIFactory<PointTXYZ, IntensityT>::buildGeometry (bool unique_stateset) const
+osgpcl::PointCloudIFactory<PointTXYZ, IntensityT>::buildGeometry (bool unique_stateset)
   {
 	 typename pcl::PointCloud<PointTXYZ>::ConstPtr xyz = getInputCloud<PointTXYZ>();
 	   typename pcl::PointCloud<IntensityT>::ConstPtr icloud = getInputCloud<IntensityT>();
@@ -419,19 +419,25 @@ template<typename PointTXYZ, typename LabelT>
 inline osgpcl::PointCloudLabelFactory<PointTXYZ, LabelT>::PointCloudLabelFactory ()
 {
   //set up a basic color map for consistency on the typical labels used
- /* color_map_[0] = osg::Vec4f(0.2,0.2,0.2,1);
-  color_map_[1] = osg::Vec4f(0.4,0.1,0.1,1);
-  color_map_[2] = osg::Vec4f(0.4,0.4,0.1,1);
-  color_map_[3] = osg::Vec4f(0.4,0.1,0.4,1);
-  color_map_[4] = osg::Vec4f(0.1,0.8,0.1,1);
-  color_map_[5] = osg::Vec4f(0.8,0.1,0.1,1);
-  color_map_[6] = osg::Vec4f(0.8,0.8,0.1,1);
-  color_map_[7] = osg::Vec4f(0.8,0.1,0.8,1);
-  color_map_[8] = osg::Vec4f(0.1,0.8,0.1,1);
-  color_map_[9] = osg::Vec4f(0.6,0.3,0.3,1);
-  color_map_[10] = osg::Vec4f(0.6,0.6,0.3,1);
-  color_map_[11] = osg::Vec4f(0.6,0.3,0.6,1);
-  color_map_[12] = osg::Vec4f(0.3,0.6,0.3,1); */
+  color_map_[0] = osg::Vec4f(0.2,0.2,0.2,1);
+  color_map_[1] = osg::Vec4f(1,0,0,1);
+  color_map_[2] = osg::Vec4f(0,1,0,1);
+  color_map_[3] = osg::Vec4f(0,0,1,1);
+  color_map_[4] = osg::Vec4f(1,0,1,1);
+  color_map_[5] = osg::Vec4f(1,1,0,1);
+  color_map_[6] = osg::Vec4f(0.4,0.1,0.1,1);
+  color_map_[7] = osg::Vec4f(0.4,0.4,0.1,1);
+  color_map_[8] = osg::Vec4f(0.4,0.1,0.4,1);
+  color_map_[9] = osg::Vec4f(0.1,0.8,0.1,1);
+  color_map_[10] = osg::Vec4f(0.8,0.1,0.1,1);
+  color_map_[11] = osg::Vec4f(0.8,0.8,0.1,1);
+  color_map_[12] = osg::Vec4f(0.8,0.1,0.8,1);
+  color_map_[13] = osg::Vec4f(0.1,0.8,0.1,1);
+  color_map_[14] = osg::Vec4f(0.6,0.3,0.3,1);
+  color_map_[15] = osg::Vec4f(0.6,0.6,0.3,1);
+  color_map_[16] = osg::Vec4f(0.6,0.3,0.6,1);
+  color_map_[17] = osg::Vec4f(0.3,0.6,0.3,1);
+
   random_coloring_ =true;
 
   stateset_ = new osg::StateSet;
@@ -443,7 +449,7 @@ inline osgpcl::PointCloudLabelFactory<PointTXYZ, LabelT>::PointCloudLabelFactory
 
 template<typename PointTXYZ, typename LabelT>
 inline osgpcl::PointCloudGeometry* osgpcl::PointCloudLabelFactory<PointTXYZ, LabelT>::buildGeometry (
-    bool unique_stateset) const
+    bool unique_stateset)
 {
 
   typename pcl::PointCloud<PointTXYZ>::ConstPtr xyz = getInputCloud<PointTXYZ>();
@@ -464,7 +470,7 @@ inline osgpcl::PointCloudGeometry* osgpcl::PointCloudLabelFactory<PointTXYZ, Lab
   colors->reserve(lcloud->points.size());
   int psize = lcloud->points.size();
 
-  ColorMap cmap = color_map_;
+  ColorMap& cmap = color_map_;
   srand(time(NULL));
   for(int i=0; i<psize; i++){
    ColorMap::iterator iter =  cmap.find( lcloud->points[i].label);
@@ -551,7 +557,7 @@ inline osgpcl::PointCloudNormalFactory<PointTXYZ, NormalT>::PointCloudNormalFact
 
 template<typename PointTXYZ, typename NormalT>
 inline osgpcl::PointCloudGeometry* osgpcl::PointCloudNormalFactory<PointTXYZ, NormalT>::buildGeometry(
-		bool unique_stateset) const {
+		bool unique_stateset)   {
 
 	  typename pcl::PointCloud<PointTXYZ>::ConstPtr xyz = getInputCloud<PointTXYZ>();
 	   typename pcl::PointCloud<NormalT>::ConstPtr normals = getInputCloud<NormalT>();

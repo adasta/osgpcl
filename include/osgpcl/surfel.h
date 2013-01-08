@@ -20,7 +20,7 @@ template<typename PointT, typename  NormalT, typename RadiusT>
 
 		virtual void setInputCloud(const sensor_msgs::PointCloud2::ConstPtr& cloud);
 
-		virtual PointCloudGeometry* buildGeometry(bool unique_state =false)const ;
+		virtual PointCloudGeometry* buildGeometry(bool unique_state =false)  ;
 	private:
 		Eigen::MatrixXf circle_cache;
 	};
@@ -34,7 +34,7 @@ template<typename PointT, typename  NormalT, typename RadiusT>
 
 		virtual void setInputCloud(const sensor_msgs::PointCloud2::ConstPtr& cloud);
 
-		virtual PointCloudGeometry* buildGeometry(bool unique_state =false)const ;
+		virtual PointCloudGeometry* buildGeometry(bool unique_state =false)  ;
 		void setRadius(float radius);
 	};
 
@@ -47,7 +47,7 @@ template<typename PointT, typename  NormalT, typename RadiusT>
 
 			virtual void setInputCloud(const sensor_msgs::PointCloud2::ConstPtr& cloud);
 
-			virtual PointCloudGeometry* buildGeometry(bool unique_state =false)const ;
+			virtual PointCloudGeometry* buildGeometry(bool unique_state =false)  ;
 			void setRadius(float radius);
 		};
 
@@ -60,7 +60,7 @@ template<typename PointT, typename  NormalT, typename RadiusT>
 
 			virtual void setInputCloud(const sensor_msgs::PointCloud2::ConstPtr& cloud);
 
-			virtual PointCloudGeometry* buildGeometry(bool unique_state =false)const ;
+			virtual PointCloudGeometry* buildGeometry(bool unique_state =false)  ;
 			void setRadius(float radius);
 		private:
 			float radius_;
