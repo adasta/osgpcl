@@ -158,12 +158,13 @@ namespace osgpcl
   {
     sensor_msgs::PointCloud2::Ptr rblob(new sensor_msgs::PointCloud2);
     if (subsample>0.999) {
+      std::cout << "Querying " << query_depth << " \n";
       octree_->queryBBIncludes(ConstVec3dMap(min), ConstVec3dMap(max), query_depth, dst_blob);
       return;
     }
     else octree_->queryBBIncludes(ConstVec3dMap(min), ConstVec3dMap(max), query_depth, rblob);
 
-    std::vector<int> sub_indices;
+     std::vector<int> sub_indices;
     sub_indices.resize(rblob->width*rblob->height);
 
     boost::mt19937 rand_gen( std::time(NULL));

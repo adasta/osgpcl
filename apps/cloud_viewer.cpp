@@ -35,6 +35,7 @@ class CameraFPManipulator : public  osgGA::FirstPersonManipulator {
 
 int main(int argc, char** argv){
   po::options_description desc("./cloud_viewer [options] input ... ");
+  pcl::console::setVerbosityLevel(pcl::console::L_VERBOSE);
 
   std::vector<std::string> infiles;
 
@@ -50,6 +51,7 @@ int main(int argc, char** argv){
     ("range,R", po::value<std::string>(), "Render point cloud using field range.  specify the field")
     ("surfel,S", "Render surfel point cloud ")
     ("flight,F", "use flight camera manipulator ")
+    ("verbose,V", "verbose debug output ")
      ;
 
   po::positional_options_description p;

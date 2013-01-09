@@ -9,6 +9,7 @@ link_directories(${CMAKE_BINARY_DIR}/lib)
 
 include_directories( include)
 
+set(CMAKE_BUILD_TYPE "DEBUG")
 ######################### External Libraries ###########################
 	
 find_package(PCL 1.7 REQUIRED COMPONENTS 

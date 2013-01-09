@@ -80,7 +80,7 @@ namespace osgpcl
 
     if (coptions->getOctree() == NULL){
       if ( ! boost::filesystem::exists(fileName))  return osgDB::ReaderWriter::ReadResult::FILE_NOT_FOUND;
-      OutofCoreOctreeT<pcl::PointXYZ>::OctreePtr ot (new OutofCoreOctreeT<pcl::PointXYZ>::Octree(fileName, false));
+      OutofCoreOctreeT<pcl::PointXYZ>::OctreePtr ot (new OutofCoreOctreeT<pcl::PointXYZ>::Octree(fileName, true));
       OutofCoreOctreeT<pcl::PointXYZ>::Ptr tree (new OutofCoreOctreeT<pcl::PointXYZ>(ot));
       coptions->init( tree);
 
@@ -91,8 +91,6 @@ namespace osgpcl
       fact->setRange(coptions->getBBmin()[2], coptions->getBBmax()[2]);
       coptions->setFactory(fact);
     }
-   // std::cout << "Loading " << coptions->getDepth() << " \n";
- //   printBB(std::cout, *coptions);
 
     const osg::Vec3d & bbmin =coptions->getBBmin();
     const osg::Vec3d& bbmax =coptions->getBBmax();
@@ -110,7 +108,9 @@ namespace osgpcl
       else{
         coptions->getOctree()->queryBBIncludes_subsample(coptions->getBBmin()._v, coptions->getBBmax()._v,coptions->getDepth(), coptions->getSamplingRate(), cloud);
       }
-
+      //std::cout << "Loading " << coptions->getDepth() << " \n";
+      //printBB(std::cout, *coptions);
+      //std::cout << "There are  " << cloud->width*cloud->height << " points \n";
       if (cloud->width*cloud->height == 0 ) return new osg::Node;
       coptions->getFactory()->setInputCloud(cloud);
       return coptions->getFactory()->buildNode();
@@ -149,7 +149,7 @@ namespace osgpcl
 
         clod->setFileName(0, fileName);
         clod->setDatabaseOptions(child_opts);
-        clod->setRange(0,0,child_rad*2.0f);
+        clod->setRange(0,0,child_rad*3.0f);
         clod->setCenterMode( osg::LOD::USER_DEFINED_CENTER );
         clod->setCenter( ccenter );
         clod->setRadius( radius/2.0 );
@@ -173,9 +173,9 @@ namespace osgpcl
     }
     else{
       if (coptions->getDepth() == coptions->getMaxDepth()){
-        lod->setRange(rep_id, 0 , radius*2);
+        lod->setRange(rep_id, 0 , radius*3);
       }
-      else  lod->setRange(rep_id, 0, radius*2);
+      else  lod->setRange(rep_id, 0, radius*3);
     }
     return lod.get();
   }
