@@ -35,7 +35,6 @@ class CameraFPManipulator : public  osgGA::FirstPersonManipulator {
 
 int main(int argc, char** argv){
   po::options_description desc("./cloud_viewer [options] input ... ");
-  pcl::console::setVerbosityLevel(pcl::console::L_VERBOSE);
 
   std::vector<std::string> infiles;
 
@@ -70,6 +69,8 @@ int main(int argc, char** argv){
      return 1;
  }
 
+ if (vm.count("verbose") )   pcl::console::setVerbosityLevel(pcl::console::L_VERBOSE);
+ else pcl::console::setVerbosityLevel(pcl::console::L_INFO);
  osg::ref_ptr<osgpcl::PointCloudFactory> factory;
 
  if(vm.count("intensity") && vm.count("surfel")){
@@ -137,6 +138,7 @@ if (vm.count("flight")){
   viewer.setCameraManipulator(new  CameraFPManipulator);
 }
 
+std::cout<< "Loading finished\n";
 
 return viewer.run();
 
