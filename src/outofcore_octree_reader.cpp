@@ -65,8 +65,11 @@ namespace osgpcl
       return ReadResult();
     }
 
-    osg::ref_ptr< OutOfCoreOptions>   coptions = dynamic_cast< OutOfCoreOptions*>( const_cast<osgDB::Options*>(options) );
 
+    //Check to see if an OutOfCore Options was given
+    //Make sure all the required values are already created ( PointCloudFactory / OutOfCore datastructure)
+    //Load/set up anything not already loaded
+    osg::ref_ptr< OutOfCoreOptions>   coptions = dynamic_cast< OutOfCoreOptions*>( const_cast<osgDB::Options*>(options) );
     if (coptions  != NULL){
       coptions = new OutOfCoreOptions( *coptions, osg::CopyOp::DEEP_COPY_ALL);
     }
@@ -83,7 +86,6 @@ namespace osgpcl
       OutofCoreOctreeT<pcl::PointXYZ>::OctreePtr ot (new OutofCoreOctreeT<pcl::PointXYZ>::Octree(fileName, true));
       OutofCoreOctreeT<pcl::PointXYZ>::Ptr tree (new OutofCoreOctreeT<pcl::PointXYZ>(ot));
       coptions->init( tree);
-
     }
 
     if (coptions->getFactory() == NULL){
@@ -92,13 +94,18 @@ namespace osgpcl
       coptions->setFactory(fact);
     }
 
+
+
     const osg::Vec3d & bbmin =coptions->getBBmin();
     const osg::Vec3d& bbmax =coptions->getBBmax();
     osg::Vec3d size = coptions->getBBmax() -coptions->getBBmin();
-    osg::Vec3d sh = size/2;
-    double radius = sh.length();
+    osg::Vec3d child_size = size/2; //size of this octants children
+    double radius = child_size.length();
 
-
+    /*
+     * If this voxel is supposed to be a leaf, we load the 3D visualization
+     * and exit
+     */
     if (coptions->isLeaf()){
    //   std::cout << "Loaded leaf at depth " << coptions->getDepth() << " \n";
       sensor_msgs::PointCloud2::Ptr cloud(new sensor_msgs::PointCloud2);
@@ -108,13 +115,14 @@ namespace osgpcl
       else{
         coptions->getOctree()->queryBBIncludes_subsample(coptions->getBBmin()._v, coptions->getBBmax()._v,coptions->getDepth(), coptions->getSamplingRate(), cloud);
       }
-    // std::cout << "Loading " << coptions->getDepth() << " \n";
-    //  printBB(std::cout, *coptions);
-    //  std::cout << "There are  " << cloud->width*cloud->height << " points \n";
       if (cloud->width*cloud->height == 0 ) return new osg::Node;
       coptions->getFactory()->setInputCloud(cloud);
       return coptions->getFactory()->buildNode();
     }
+
+
+    //Calculate the bounding boxes/spheres for all of the octants children
+
     osg::ref_ptr<osg::PagedLOD> lod = new osg::PagedLOD;
     lod->setCenterMode( osg::LOD::USER_DEFINED_CENTER );
     osg::Vec3d center = (bbmax + bbmin)/2.0f ;
@@ -122,29 +130,34 @@ namespace osgpcl
     lod->setRadius( radius );
 
     std::vector<osg::Vec3d > minbbs;
-    minbbs += bbmin, bbmin+ osg::Vec3d(sh[0],0,0), bbmin+ osg::Vec3d(sh[0],sh[1],0),
-        bbmin+ osg::Vec3d(0,sh[1],0), bbmin+ osg::Vec3d(0, sh[1], sh[2]),
-        bbmin+ osg::Vec3d(sh[0], sh[1], sh[2]),  bbmin+osg::Vec3d(sh[0], 0 , sh[2]),
-        bbmin+osg::Vec3d(0, 0, sh[2]);
+    minbbs += bbmin, bbmin+ osg::Vec3d(child_size[0],0,0), bbmin+ osg::Vec3d(child_size[0],child_size[1],0),
+        bbmin+ osg::Vec3d(0,child_size[1],0), bbmin+ osg::Vec3d(0, child_size[1], child_size[2]),
+        bbmin+ osg::Vec3d(child_size[0], child_size[1], child_size[2]),  bbmin+osg::Vec3d(child_size[0], 0 , child_size[2]),
+        bbmin+osg::Vec3d(0, 0, child_size[2]);
 
-    float child_rad = sh.length()/2;
+    float child_rad = child_size.length()/2;
      int cdepth = coptions->getDepth()+1;
 
      bool build_children =true;
     if (cdepth >= coptions->getMaxDepth()) build_children = false;
 
+
+
     if (build_children) {
       osg::Group* group = new osg::Group;
 
+
+      //Load the children as LOD actors so that they will be automatically loaded
+      //from the disk when the camera is looking at them
       for(int i=0; i<8; i++){
         //todo add some way to check the number of points within a bounding box without actually retrieving them
         osg::PagedLOD* clod = new osg::PagedLOD;
 
         OutOfCoreOptions* child_opts = new OutOfCoreOptions(*coptions, osg::CopyOp::DEEP_COPY_ALL);
 
-        osg::Vec3d vmax = minbbs[i]+sh;
+        osg::Vec3d vmax = minbbs[i]+child_size;
         osg::Vec3d ccenter = (vmax+ minbbs[i])/2.0f;
-        child_opts->setBoundingBox( minbbs[i],  minbbs[i]+sh);
+        child_opts->setBoundingBox( minbbs[i],  minbbs[i]+child_size);
         child_opts->setDepth(cdepth, coptions->getMaxDepth());
 
         clod->setFileName(0, fileName);
@@ -155,27 +168,28 @@ namespace osgpcl
         clod->setRadius( radius/2.0 );
         group->addChild(clod);
       }
+      //Add the child group to the lod actor
       if (! lod->addChild(group,0, child_rad*2)){
         std::cout << "Failed to add group \n";
       }
     }
 
-    int rep_id = (build_children) ?  1 :0;
+
+    int rep_id = (build_children) ?  1 :0; //place the current nodes visualization in the correct LOD slot
     {
       OutOfCoreOptions* child_opts = new OutOfCoreOptions(*coptions, osg::CopyOp::DEEP_COPY_ALL);
       child_opts->setLeaf(true);
       lod->setDatabaseOptions( child_opts);
       lod->setFileName(rep_id, fileName);
     }
-    if(coptions->isRoot()){
+
+
+    if(coptions->isRoot()){ //if it is the root node, it should always be visible
       lod->setRange(rep_id,  0, FLT_MAX);
         coptions->setRoot(false);
     }
     else{
-      if (coptions->getDepth() == coptions->getMaxDepth()){
-        lod->setRange(rep_id, 0 , radius*3);
-      }
-      else  lod->setRange(rep_id, 0, radius*3);
+      lod->setRange(rep_id, 0, radius*3);
     }
     return lod.get();
   }

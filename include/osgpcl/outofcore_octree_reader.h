@@ -98,6 +98,12 @@ namespace osgpcl
     /** Return available features*/
     virtual Features supportedFeatures() const;
 
+
+    /*
+     * readNode
+     * Recursively loads each octant outofcore octree data structure into a osg::Node
+     * for visualization
+     */
     virtual ReadResult readNode(const std::string& fileName, const osgDB::ReaderWriter::Options* options) const;
 
     /*
