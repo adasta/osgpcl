@@ -10,6 +10,15 @@
 
 #include <osgpcl/point_cloud.h>
 
+/*
+ * EXPERIMENTAL SURFEL IMPLEMENTATIONS
+ *
+ * Outside use of these factories are not recommended.
+ * These factories were implemented to test various ways of rendering
+ * surfels.
+ */
+
+
 namespace osgpcl{
 template<typename PointT, typename  NormalT, typename RadiusT>
 	class SurfelFactoryFF : public  PointCloudFactory{

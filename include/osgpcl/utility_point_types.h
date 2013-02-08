@@ -2,7 +2,8 @@
  * utility_point_types.h
  *
  *  Created on: Sep 5, 2012
- *      Author: asher
+ *      Author: Adam Stambler
+ *
  */
 
 #ifndef UTILITY_POINT_TYPES_H_
@@ -11,7 +12,11 @@
 #include <pcl/point_types.h>
 
 namespace osgpcl{
-	struct RadiusPointT{
+/*
+ * RadiusPointT
+ * special point type defined for surfel radius
+ */
+struct RadiusPointT{
 		float radius;
 	};
 }

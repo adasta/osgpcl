@@ -108,9 +108,9 @@ namespace osgpcl
       else{
         coptions->getOctree()->queryBBIncludes_subsample(coptions->getBBmin()._v, coptions->getBBmax()._v,coptions->getDepth(), coptions->getSamplingRate(), cloud);
       }
-      std::cout << "Loading " << coptions->getDepth() << " \n";
-      printBB(std::cout, *coptions);
-      std::cout << "There are  " << cloud->width*cloud->height << " points \n";
+    // std::cout << "Loading " << coptions->getDepth() << " \n";
+    //  printBB(std::cout, *coptions);
+    //  std::cout << "There are  " << cloud->width*cloud->height << " points \n";
       if (cloud->width*cloud->height == 0 ) return new osg::Node;
       coptions->getFactory()->setInputCloud(cloud);
       return coptions->getFactory()->buildNode();

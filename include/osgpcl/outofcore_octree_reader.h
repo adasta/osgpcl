@@ -5,8 +5,8 @@
  *      Author: Adam Stambler
  */
 
-#ifndef OUTOFCOREOCTREEREADER_H_
-#define OUTOFCOREOCTREEREADER_H_
+#ifndef _OSGPCL_OUTOFCORE_OCTREE_READER_
+#define _OSGPCL_OUTOFCORE_OCTREE_READER_
 
 #include <osgpcl/point_cloud.h>
 #include <osgpcl/common.h>
@@ -26,6 +26,11 @@
 namespace osgpcl
 {
 
+/*
+ * OutoFCoreOctree
+ * Untemplated Abstract base class wrapper used for querying the templated
+ * outofcore Octree structure.
+ */
   class OutOfCoreOctree
   {
     public:
@@ -44,6 +49,10 @@ namespace osgpcl
   };
 
 
+/*
+ * OutofCoreOctreeT
+ * Templated wrapper around the standard PCL outofcore octree datastructure
+ */
   template<typename PointT>
   class OutofCoreOctreeT : public OutOfCoreOctree{
     public:
@@ -73,7 +82,10 @@ namespace osgpcl
 
   };
 
-
+/*
+ * OutOfCoreOctreeReader
+ * osgDB::Readwriter implementation for PCL OutOfCore trees.  Reads  ".oct_idx" extension
+ */
   class OutofCoreOctreeReader : public osgDB::ReaderWriter
   {
     public:
@@ -88,7 +100,12 @@ namespace osgpcl
 
     virtual ReadResult readNode(const std::string& fileName, const osgDB::ReaderWriter::Options* options) const;
 
-
+    /*
+     * OutOfCoreOptions
+     * Spectialization of CloudReaderOptions to provide additional options specific
+     * to OutOfCore point clouds.  This can control which level of detail the
+     * system should display or which portion of the point cloud should be displayed.
+     */
       class OutOfCoreOptions : public CloudReaderOptions {
         public:
         OutOfCoreOptions(float sample = 1.0);

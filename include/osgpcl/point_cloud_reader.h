@@ -5,8 +5,8 @@
  *      Author: Adam Stambler
  */
 
-#ifndef POINT_CLOUD_READER_H_
-#define POINT_CLOUD_READER_H_
+#ifndef _OSGPCL_POINT_CLOUD_READER_H_
+#define _OSGPCL_POINT_CLOUD_READER_H_
 
 #include <osgpcl/point_cloud.h>
 
@@ -20,6 +20,12 @@
 namespace osgpcl
 {
 
+/*
+ * PointCloudReader
+ * osgDB::ReaderWriter implementation for the point cloud library pcd files.
+ * Pass a CloudReaderOptions to readNode to choose which type of PointCloudFactory
+ * is used to generate the point cloud model.
+ */
   class PointCloudReader : public osgDB::ReaderWriter
   {
     public:

@@ -12,7 +12,7 @@
 #include <osgpcl/point_cloud.h>
 #include <pcl/console/print.h>
 #include <osg/Point>
-
+#include <osg/LineWidth>
 #include <pcl/point_traits.h>
 #include <pcl/common/concatenate.h>
 #include <pcl/ros/conversions.h>
@@ -536,22 +536,25 @@ inline void osgpcl::PointCloudLabelFactory<PointTXYZ, LabelT>::enableRandomColor
 
 // ********************************* Normal Factory ********************************
 
-
 template<typename PointTXYZ, typename NormalT>
 inline osgpcl::PointCloudNormalFactory<PointTXYZ, NormalT>::PointCloudNormalFactory() {
     stateset_ = new osg::StateSet;
 
-    osg::Point* p = new osg::Point;
-    p->setSize(4);
-
+    /*osg::Point* p = new osg::Point;
+    p->setSize(6);
     stateset_->setAttribute(p);
+    */
+
+    osg::LineWidth* lw = new osg::LineWidth;
+    lw->setWidth(4);
+    stateset_->setAttribute(lw);
 
     stateset_->setMode( GL_LIGHTING, osg::StateAttribute::OFF );
 
     nlength = 0.5;
     color_[0]=1;
     color_[1]=1;
-    color_[2]=1;
+    color_[2]=0;
     color_[3]=1;
 }
 
@@ -580,10 +583,16 @@ inline osgpcl::PointCloudGeometry* osgpcl::PointCloudNormalFactory<PointTXYZ, No
       pts->push_back( osg::Vec3(npt[0], npt[1], npt[2] ) );
     }
     geom->setVertexArray( pts );
-    geom->addPrimitiveSet( new osg::DrawArrays( GL_LINE, 0, pts->size()/2.0 ) );
+    geom->addPrimitiveSet( new osg::DrawArrays( osg::PrimitiveSet::LINES, 0, xyz->points.size() ) );
     osg::Vec4Array* colors = new osg::Vec4Array;
     colors->push_back(color_);
-    geom->setColorBinding( osg::Geometry::BIND_PER_PRIMITIVE_SET);
+    geom->setColorBinding( osg::Geometry::BIND_OVERALL);
+    if (unique_stateset){
+      geom->setStateSet(new osg::StateSet(*stateset_));
+    }
+    else{
+      geom->setStateSet(stateset_ );
+    }
     return geom;
 }
 

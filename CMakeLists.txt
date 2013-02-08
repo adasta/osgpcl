@@ -9,7 +9,7 @@ link_directories(${CMAKE_BINARY_DIR}/lib)
 
 include_directories( include)
 
-set(CMAKE_BUILD_TYPE "RELEASE")
+set(CMAKE_BUILD_TYPE "DEBUG")
 ######################### External Libraries ###########################
 	
 find_package(PCL 1.7 REQUIRED COMPONENTS 
@@ -43,14 +43,15 @@ ${Boost_LIBRARIES}
 add_library(osgpcl src/point_cloud.cpp 
 				   src/common.cpp
 				   src/surfel.cpp  
+				   src/shapes.cpp
 				   )
-target_link_libraries(osgpcl debug ${OSGPCL_DEP_LIBRARIES})
+target_link_libraries(osgpcl debug ${OSGPCL_DEP_LIBRARIES} )
 
 add_library(osgdb_oct_idx  src/outofcore_octree_reader.cpp)
-target_link_libraries(osgdb_oct_idx osgpcl ${OSGPCL_DEP_LIBRARIES})
+target_link_libraries(osgdb_oct_idx osgpcl ${OSGPCL_DEP_LIBRARIES} osgDB)
 
 add_library(osgdb_pcd src/point_cloud_reader.cpp)
-target_link_libraries(osgdb_pcd osgpcl ${OSGPCL_DEP_LIBRARIES})
+target_link_libraries(osgdb_pcd osgpcl ${OSGPCL_DEP_LIBRARIES} osgDB)
 
 add_executable(cloud_viewer apps/cloud_viewer.cpp)
 target_link_libraries(cloud_viewer osgpcl ${OSGPCL_DEP_LIBRARIES} osgdb_pcd osgdb_oct_idx)
