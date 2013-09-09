@@ -27,7 +27,7 @@ template<typename PointT, typename  NormalT, typename RadiusT>
 		~SurfelFactoryFF(){}
 		using PointCloudFactory::setInputCloud;
 
-		virtual void setInputCloud(const sensor_msgs::PointCloud2::ConstPtr& cloud);
+		virtual void setInputCloud(const pcl::PCLPointCloud2::ConstPtr& cloud);
 
 		virtual PointCloudGeometry* buildGeometry(bool unique_state =false)  ;
 	private:
@@ -41,7 +41,7 @@ template<typename PointT, typename  NormalT, typename RadiusT>
 		~SurfelFactory(){}
 		using PointCloudFactory::setInputCloud;
 
-		virtual void setInputCloud(const sensor_msgs::PointCloud2::ConstPtr& cloud);
+		virtual void setInputCloud(const pcl::PCLPointCloud2::ConstPtr& cloud);
 
 		virtual PointCloudGeometry* buildGeometry(bool unique_state =false)  ;
 		void setRadius(float radius);
@@ -54,7 +54,7 @@ template<typename PointT, typename  NormalT, typename RadiusT>
 			~SurfelFactoryI(){}
 			using PointCloudFactory::setInputCloud;
 
-			virtual void setInputCloud(const sensor_msgs::PointCloud2::ConstPtr& cloud);
+			virtual void setInputCloud(const pcl::PCLPointCloud2::ConstPtr& cloud);
 
 			virtual PointCloudGeometry* buildGeometry(bool unique_state =false)  ;
 			void setRadius(float radius);
@@ -67,7 +67,7 @@ template<typename PointT, typename  NormalT, typename RadiusT>
 			~SurfelFactoryFFI(){}
 			using PointCloudFactory::setInputCloud;
 
-			virtual void setInputCloud(const sensor_msgs::PointCloud2::ConstPtr& cloud);
+			virtual void setInputCloud(const pcl::PCLPointCloud2::ConstPtr& cloud);
 
 			virtual PointCloudGeometry* buildGeometry(bool unique_state =false)  ;
 			void setRadius(float radius);

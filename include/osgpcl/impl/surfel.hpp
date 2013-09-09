@@ -105,7 +105,7 @@ osg::Geometry* osgpcl::SurfelFactory<PointT, NormalT>:: buildGeometry(bool uniqu
     geom->addPrimitiveSet( new osg::DrawArrays( GL_POINTS, 0, pts->size() ) );
 
     geom->setNormalArray(npts);
-    geom->setNormalBinding(osg::Geometry::BIND_PER_PRIMITIVE);
+    geom->setNormalBinding( osg::Geometry::BIND_PER_VERTEX );
 
     geom->setStateSet(stateset_);
     return geom;
@@ -113,13 +113,13 @@ osg::Geometry* osgpcl::SurfelFactory<PointT, NormalT>:: buildGeometry(bool uniqu
 
 template<typename PointT, typename NormalT>
 inline void osgpcl::SurfelFactory<PointT, NormalT>::setInputCloud(
-        const sensor_msgs::PointCloud2::ConstPtr& cloud) {
+        const pcl::PCLPointCloud2::ConstPtr& cloud) {
       typename pcl::PointCloud<PointT>::Ptr xyz(new pcl::PointCloud<PointT>);
-      pcl::fromROSMsg(*cloud,*xyz);
+      pcl::fromPCLPointCloud2(*cloud,*xyz);
       PointCloudFactory::setInputCloud<PointT>(xyz);
 
       typename pcl::PointCloud<NormalT>::Ptr norms(new pcl::PointCloud<NormalT>);
-      pcl::fromROSMsg(*cloud,*norms);
+      pcl::fromPCLPointCloud2(*cloud,*norms);
       PointCloudFactory::setInputCloud<NormalT>(norms);
 
 }
@@ -255,17 +255,17 @@ osg::Geometry* osgpcl::SurfelFactoryI<PointT, NormalT, IntensityT>::buildGeometr
 
 template<typename PointT, typename NormalT, typename IntensityT>
 inline void osgpcl::SurfelFactoryI<PointT, NormalT, IntensityT>::setInputCloud(
-        const sensor_msgs::PointCloud2::ConstPtr& cloud) {
+        const pcl::PCLPointCloud2::ConstPtr& cloud) {
       typename pcl::PointCloud<PointT>::Ptr xyz(new pcl::PointCloud<PointT>);
-      pcl::fromROSMsg(*cloud,*xyz);
+      pcl::fromPCLPointCloud2(*cloud,*xyz);
       PointCloudFactory::setInputCloud<PointT>(xyz);
 
       typename pcl::PointCloud<NormalT>::Ptr norms(new pcl::PointCloud<NormalT>);
-      pcl::fromROSMsg(*cloud,*norms);
+      pcl::fromPCLPointCloud2(*cloud,*norms);
       PointCloudFactory::setInputCloud<NormalT>(norms);
 
       typename pcl::PointCloud<IntensityT>::Ptr iten(new pcl::PointCloud<IntensityT>);
-      pcl::fromROSMsg(*cloud,*iten);
+      pcl::fromPCLPointCloud2(*cloud,*iten);
       PointCloudFactory::setInputCloud<IntensityT>(iten);
 }
 
@@ -325,7 +325,7 @@ osg::Geometry* osgpcl::SurfelFactoryFFI<PointT, NormalT, IntensityT>::buildGeome
 
     int fan_size = 1+ circle_cache.rows();
     pts->reserve(indices->size()*fan_size );
-    npts->reserve(indices->size());
+    npts->reserve(indices->size()*fan_size );
     cpts->reserve(indices->size());
 
     osg::Geometry* geom = new osg::Geometry;
@@ -357,13 +357,14 @@ osg::Geometry* osgpcl::SurfelFactoryFFI<PointT, NormalT, IntensityT>::buildGeome
       for(int j=0; j<circle_cache.rows(); j++){
           Eigen::Vector3f apt = rot*circle_cache.row(j).transpose() + pt.getVector3fMap();
           pts->push_back(osg::Vec3(apt[0],apt[1],apt[2]));
+      	  npts->push_back(osg::Vec3(npt.normal_x, npt.normal_y, npt.normal_z));
       }
         geom->addPrimitiveSet( new osg::DrawArrays( GL_TRIANGLE_FAN, pstart,  fan_size ) );
         pstart+= fan_size;
     }
     geom->setVertexArray( pts );
     geom->setNormalArray(npts);
-    geom->setNormalBinding(osg::Geometry::BIND_PER_PRIMITIVE);
+    geom->setNormalBinding(osg::Geometry::BIND_PER_VERTEX);
     geom->setColorArray(cpts);
     geom->setColorBinding(osg::Geometry::BIND_PER_PRIMITIVE_SET);
     geom->setStateSet(stateset_);
@@ -373,17 +374,17 @@ osg::Geometry* osgpcl::SurfelFactoryFFI<PointT, NormalT, IntensityT>::buildGeome
 
 template<typename PointT, typename NormalT, typename IntensityT>
 inline void osgpcl::SurfelFactoryFFI<PointT, NormalT, IntensityT>::setInputCloud(
-        const sensor_msgs::PointCloud2::ConstPtr& cloud) {
+        const pcl::PCLPointCloud2::ConstPtr& cloud) {
       typename pcl::PointCloud<PointT>::Ptr xyz(new pcl::PointCloud<PointT>);
-      pcl::fromROSMsg(*cloud,*xyz);
+      pcl::fromPCLPointCloud2(*cloud,*xyz);
       PointCloudFactory::setInputCloud<PointT>(xyz);
 
       typename pcl::PointCloud<NormalT>::Ptr norms(new pcl::PointCloud<NormalT>);
-      pcl::fromROSMsg(*cloud,*norms);
+      pcl::fromPCLPointCloud2(*cloud,*norms);
       PointCloudFactory::setInputCloud<NormalT>(norms);
 
       typename pcl::PointCloud<IntensityT>::Ptr iten(new pcl::PointCloud<IntensityT>);
-      pcl::fromROSMsg(*cloud,*iten);
+      pcl::fromPCLPointCloud2(*cloud,*iten);
       PointCloudFactory::setInputCloud<IntensityT>(iten);
 }
 
@@ -410,19 +411,19 @@ osgpcl::SurfelFactoryFF<PointT, NormalT, RadiusT>::SurfelFactoryFF() {
 
 template<typename PointT, typename NormalT, typename RadiusT>
 void osgpcl::SurfelFactoryFF<PointT, NormalT, RadiusT>::setInputCloud(
-        const sensor_msgs::PointCloud2::ConstPtr& cloud) {
+        const pcl::PCLPointCloud2::ConstPtr& cloud) {
       typename pcl::PointCloud<PointT>::Ptr xyz(new pcl::PointCloud<PointT>);
-      pcl::fromROSMsg(*cloud,*xyz);
+      pcl::fromPCLPointCloud2(*cloud,*xyz);
       PointCloudFactory::setInputCloud<PointT>(xyz);
 
       if ( !boost::is_same<PointT, NormalT>::value){
           typename pcl::PointCloud<NormalT>::Ptr norms(new pcl::PointCloud<NormalT>);
-          pcl::fromROSMsg(*cloud,*norms);
+          pcl::fromPCLPointCloud2(*cloud,*norms);
           PointCloudFactory::setInputCloud<NormalT>(norms);
       }
       if ( !boost::is_same<PointT, RadiusT>::value){
           typename pcl::PointCloud<RadiusT>::Ptr norms(new pcl::PointCloud<RadiusT>);
-          pcl::fromROSMsg(*cloud,*norms);
+          pcl::fromPCLPointCloud2(*cloud,*norms);
           PointCloudFactory::setInputCloud<RadiusT>(norms);
       }
 }
@@ -459,7 +460,7 @@ osgpcl::PointCloudGeometry* osgpcl::SurfelFactoryFF<PointT, NormalT, RadiusT>::b
         osg::Vec3Array* npts = new osg::Vec3Array;
         int fan_size = 1+ circle_cache.rows();
         pts->reserve(indices->size()*fan_size );
-        npts->reserve(indices->size());
+        npts->reserve(indices->size()*fan_size);
 
         osg::Geometry* geom = new osg::Geometry;
 
@@ -488,13 +489,14 @@ osgpcl::PointCloudGeometry* osgpcl::SurfelFactoryFF<PointT, NormalT, RadiusT>::b
           for(int j=0; j<circle_cache.rows(); j++){
               Eigen::Vector3f apt = rot*circle_cache.row(j).transpose() + pt.getVector3fMap();
               pts->push_back(osg::Vec3(apt[0],apt[1],apt[2]));
+              npts->push_back(osg::Vec3(npt.normal_x, npt.normal_y, npt.normal_z));
           }
             geom->addPrimitiveSet( new osg::DrawArrays( GL_TRIANGLE_FAN, pstart,  fan_size ) );
             pstart+= fan_size;
         }
         geom->setVertexArray( pts );
         geom->setNormalArray(npts);
-        geom->setNormalBinding(osg::Geometry::BIND_PER_PRIMITIVE);
+        geom->setNormalBinding( osg::Geometry::BIND_PER_VERTEX );
 
         geom->setStateSet(stateset_);
         return geom;
