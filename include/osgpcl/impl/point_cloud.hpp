@@ -132,10 +132,10 @@
 
 template<typename PointT> void
 osgpcl::PointCloudColoredFactory<PointT>::setInputCloud (
-    const sensor_msgs::PointCloud2::ConstPtr& cloud)
+    const pcl::PCLPointCloud2::ConstPtr& cloud)
 {
   typename pcl::PointCloud<PointT>::Ptr xyz(new pcl::PointCloud<PointT>);
-  pcl::fromROSMsg(*cloud,*xyz);
+  pcl::fromPCLPointCloud2(*cloud,*xyz);
   PointCloudFactory::setInputCloud<PointT>(xyz);
 }
 
@@ -204,15 +204,15 @@ osgpcl::PointCloudColoredFactory<PointT>::setInputCloud (
 
   template<typename PointTXYZ , typename RGBT>
   inline void osgpcl::PointCloudRGBFactory<PointTXYZ, RGBT>::setInputCloud (
-      const sensor_msgs::PointCloud2::ConstPtr& cloud)
+      const pcl::PCLPointCloud2::ConstPtr& cloud)
   {
     typename pcl::PointCloud<PointTXYZ>::Ptr xyz(new pcl::PointCloud<PointTXYZ>);
-    pcl::fromROSMsg(*cloud,*xyz);
+    pcl::fromPCLPointCloud2(*cloud,*xyz);
     PointCloudFactory::setInputCloud<PointTXYZ>(xyz);
 
     if ( !boost::is_same<PointTXYZ, RGBT>::value){
       typename pcl::PointCloud<RGBT>::Ptr rgb(new pcl::PointCloud<RGBT>);
-      pcl::fromROSMsg(*cloud,*rgb);
+      pcl::fromPCLPointCloud2(*cloud,*rgb);
       PointCloudFactory::setInputCloud<RGBT>(rgb);
     }
   }
@@ -267,7 +267,7 @@ osgpcl::PointCloudCRangeFactory<PointTXYZ, PointTF>::buildGeometry (
   }
   double minr, maxr;
 
-  std::vector<sensor_msgs::PointField> flist;
+  std::vector<pcl::PCLPointField> flist;
   pcl::getFields<PointTF>(*fcloud, flist);
 
   int idx=-1;
@@ -346,15 +346,15 @@ osgpcl::PointCloudCRangeFactory<PointTXYZ, PointTF>::setPointSize (
 
 template<typename PointTXYZ , typename PointTF >
 inline void osgpcl::PointCloudCRangeFactory<PointTXYZ, PointTF>::setInputCloud (
-    const sensor_msgs::PointCloud2::ConstPtr& cloud)
+    const pcl::PCLPointCloud2::ConstPtr& cloud)
 {
   typename  pcl::PointCloud<PointTXYZ>::Ptr xyz(new pcl::PointCloud<PointTXYZ>);
-  pcl::fromROSMsg(*cloud,*xyz);
+  pcl::fromPCLPointCloud2(*cloud,*xyz);
   PointCloudFactory::setInputCloud<PointTXYZ>(xyz);
 
   if ( !boost::is_same<PointTXYZ, PointTF>::value){
     typename pcl::PointCloud<PointTF>::Ptr fcloud(new pcl::PointCloud<PointTF>);
-    pcl::fromROSMsg(*cloud,*fcloud);
+    pcl::fromPCLPointCloud2(*cloud,*fcloud);
     PointCloudFactory::setInputCloud<PointTF>(fcloud);
   }
 }
@@ -400,15 +400,15 @@ osgpcl::PointCloudIFactory<PointTXYZ, IntensityT>::buildGeometry (bool unique_st
 
 template<typename PointTXYZ, typename IntensityT>
   void osgpcl::PointCloudIFactory<PointTXYZ, IntensityT>::setInputCloud (
-    const sensor_msgs::PointCloud2::ConstPtr& cloud)
+    const pcl::PCLPointCloud2::ConstPtr& cloud)
 {
   typename pcl::PointCloud<PointTXYZ>::Ptr xyz(new pcl::PointCloud<PointTXYZ>);
-  pcl::fromROSMsg(*cloud,*xyz);
+  pcl::fromPCLPointCloud2(*cloud,*xyz);
   PointCloudFactory::setInputCloud<PointTXYZ>(xyz);
 
   if ( !boost::is_same<PointTXYZ, IntensityT>::value){
     typename  pcl::PointCloud<IntensityT>::Ptr icloud(new pcl::PointCloud<IntensityT>);
-    pcl::fromROSMsg(*cloud,*icloud);
+    pcl::fromPCLPointCloud2(*cloud,*icloud);
     PointCloudFactory::setInputCloud<IntensityT>(icloud);
   }
 }
@@ -506,15 +506,15 @@ inline osgpcl::PointCloudGeometry* osgpcl::PointCloudLabelFactory<PointTXYZ, Lab
 
 template<typename PointTXYZ, typename LabelT>
 inline void osgpcl::PointCloudLabelFactory<PointTXYZ, LabelT>::setInputCloud (
-    const sensor_msgs::PointCloud2::ConstPtr& cloud)
+    const pcl::PCLPointCloud2::ConstPtr& cloud)
 {
   typename pcl::PointCloud<PointTXYZ>::Ptr xyz(new pcl::PointCloud<PointTXYZ>);
-    pcl::fromROSMsg(*cloud,*xyz);
+    pcl::fromPCLPointCloud2(*cloud,*xyz);
     PointCloudFactory::setInputCloud<PointTXYZ>(xyz);
 
     if ( !boost::is_same<PointTXYZ, LabelT>::value){
       typename  pcl::PointCloud<LabelT>::Ptr icloud(new pcl::PointCloud<LabelT>);
-      pcl::fromROSMsg(*cloud,*icloud);
+      pcl::fromPCLPointCloud2(*cloud,*icloud);
       PointCloudFactory::setInputCloud<LabelT>(icloud);
     }
 }
@@ -598,14 +598,14 @@ inline osgpcl::PointCloudGeometry* osgpcl::PointCloudNormalFactory<PointTXYZ, No
 
 template<typename PointTXYZ, typename NormalT>
 inline void osgpcl::PointCloudNormalFactory<PointTXYZ, NormalT>::setInputCloud(
-		const sensor_msgs::PointCloud2::ConstPtr& cloud) {
+		const pcl::PCLPointCloud2::ConstPtr& cloud) {
 	  typename pcl::PointCloud<PointTXYZ>::Ptr xyz(new pcl::PointCloud<PointTXYZ>);
-	    pcl::fromROSMsg(*cloud,*xyz);
+	    pcl::fromPCLPointCloud2(*cloud,*xyz);
 	    PointCloudFactory::setInputCloud<PointTXYZ>(xyz);
 
 	    if ( !boost::is_same<PointTXYZ, NormalT>::value){
 	      typename  pcl::PointCloud<NormalT>::Ptr icloud(new pcl::PointCloud<NormalT>);
-	      pcl::fromROSMsg(*cloud,*icloud);
+	      pcl::fromPCLPointCloud2(*cloud,*icloud);
 	      PointCloudFactory::setInputCloud<NormalT>(icloud);
 	    }
 }

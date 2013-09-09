@@ -29,7 +29,7 @@ osgpcl::CloudReaderOptions::CloudReaderOptions (
     sampling_rate_ = options.sampling_rate_;
 }
 
- bool field_present(const std::string& name, const  std::vector<sensor_msgs::PointField>& flist){
+ bool field_present(const std::string& name, const  std::vector<pcl::PCLPointField>& flist){
    for(int i=0; i<flist.size(); i++){
      if (flist[i].name == name) return true;
    }
@@ -37,7 +37,7 @@ osgpcl::CloudReaderOptions::CloudReaderOptions (
  }
 
 osgpcl::PointCloudFactory* osgpcl::chooseDefaultRepresentation (
-    const std::vector<sensor_msgs::PointField>& flist)
+    const std::vector<pcl::PCLPointField>& flist)
 {
   if ( field_present("rgb", flist)){
     return new PointCloudRGBFactory<pcl::PointXYZ, pcl::RGB>();

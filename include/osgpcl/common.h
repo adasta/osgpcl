@@ -24,7 +24,7 @@ namespace osgpcl{
    * Label ->  PointCloudLabelFactory
    * XYZ   ->  PointCloudCRange over field Z
    */
-  PointCloudFactory* chooseDefaultRepresentation(const std::vector<sensor_msgs::PointField>& flist);
+  PointCloudFactory* chooseDefaultRepresentation(const std::vector<pcl::PCLPointField>& flist);
 
 
   class CloudReaderOptions : public osgDB::Options{
