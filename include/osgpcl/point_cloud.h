@@ -22,7 +22,7 @@
 #include <map>
 #include <pcl/common/io.h>
 
-#include <sensor_msgs/PointCloud2.h>
+#include <pcl/PCLPointCloud2.h>
 
 namespace osgpcl
 {
@@ -74,7 +74,7 @@ namespace osgpcl
        * setInputCloud
        * Add a  point cloud blob to the factory as an input for constructing 3d model
        */
-      virtual void setInputCloud(const sensor_msgs::PointCloud2::ConstPtr& cloud)=0;
+      virtual void setInputCloud(const pcl::PCLPointCloud2::ConstPtr& cloud)=0;
 
       /*
        * clearInput
@@ -123,7 +123,7 @@ public:
     virtual PointCloudGeometry* buildGeometry(bool unique_stateset=false)  ;
 
     using PointCloudFactory::setInputCloud;
-    virtual void setInputCloud(const sensor_msgs::PointCloud2::ConstPtr& cloud);
+    virtual void setInputCloud(const pcl::PCLPointCloud2::ConstPtr& cloud);
 
     void setColor(float r, float g, float b, float alpha =1);
 
@@ -165,7 +165,7 @@ public:
 
     virtual PointCloudGeometry* buildGeometry(bool unique_stateset=false)  ;
     void setPointSize(int size);
-    virtual void setInputCloud(const sensor_msgs::PointCloud2::ConstPtr& cloud);
+    virtual void setInputCloud(const pcl::PCLPointCloud2::ConstPtr& cloud);
     using PointCloudFactory::setInputCloud;
 
     protected:
@@ -184,7 +184,7 @@ public:
   class PointCloudRGBFactory : public PointCloudFactory {
     public:
     virtual PointCloudGeometry* buildGeometry(bool unique_stateset=false)  ;
-    virtual void setInputCloud(const sensor_msgs::PointCloud2::ConstPtr& cloud);
+    virtual void setInputCloud(const pcl::PCLPointCloud2::ConstPtr& cloud);
     using PointCloudFactory::setInputCloud;
 
   };
@@ -200,7 +200,7 @@ public:
   class PointCloudIFactory : public PointCloudFactory {
     public:
       virtual PointCloudGeometry* buildGeometry(bool unique_stateset=false)  ;
-      virtual void setInputCloud(const sensor_msgs::PointCloud2::ConstPtr& cloud);
+      virtual void setInputCloud(const pcl::PCLPointCloud2::ConstPtr& cloud);
       using PointCloudFactory::setInputCloud;
 
   };
@@ -222,7 +222,7 @@ public:
     virtual PointCloudGeometry* buildGeometry(bool unique_stateset=false)  ;
 
     using PointCloudFactory::setInputCloud;
-    virtual void setInputCloud(const sensor_msgs::PointCloud2::ConstPtr& cloud);
+    virtual void setInputCloud(const pcl::PCLPointCloud2::ConstPtr& cloud);
 
 
     /*
@@ -253,7 +253,7 @@ public:
     virtual PointCloudGeometry* buildGeometry(bool unique_stateset=false)  ;
 
     using PointCloudFactory::setInputCloud;
-    virtual void setInputCloud(const sensor_msgs::PointCloud2::ConstPtr& cloud);
+    virtual void setInputCloud(const pcl::PCLPointCloud2::ConstPtr& cloud);
 
     void setColor(osg::Vec4f color);
 

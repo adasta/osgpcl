@@ -53,7 +53,7 @@ namespace osgpcl
       return ReadResult(ReaderWriter::ReadResult::FILE_NOT_FOUND);
     }
 
-    sensor_msgs::PointCloud2Ptr cloud(new sensor_msgs::PointCloud2);
+    pcl::PCLPointCloud2Ptr cloud(new pcl::PCLPointCloud2);
 
     pcl::PCDReader reader;
     if ( reader.read(filename, *cloud) <0 ){

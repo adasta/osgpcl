@@ -42,10 +42,10 @@ namespace osgpcl
       virtual void getBoundingBox(  double* min,   double* max)=0;
 
      virtual  void queryBBIncludes (const double min[3], const double max[3], size_t query_depth,
-          const sensor_msgs::PointCloud2::Ptr& dst_blob) const =0;
+          const pcl::PCLPointCloud2::Ptr& dst_blob) const =0;
 
      virtual  void queryBBIncludes_subsample (const double min[3], const double max[3], size_t query_depth,
-         float subsample, const sensor_msgs::PointCloud2::Ptr& dst_blob) const =0;
+         float subsample, const pcl::PCLPointCloud2::Ptr& dst_blob) const =0;
   };
 
 
@@ -62,9 +62,9 @@ namespace osgpcl
 
       OutofCoreOctreeT(const OctreePtr& octree);
       virtual  void queryBBIncludes (const double min[3], const double max[3], size_t query_depth,
-               const sensor_msgs::PointCloud2::Ptr& dst_blob) const;
+               const pcl::PCLPointCloud2::Ptr& dst_blob) const;
       virtual  void queryBBIncludes_subsample (const double min[3], const double max[3], size_t query_depth,
-          float subsample, const sensor_msgs::PointCloud2::Ptr& dst_blob) const;
+          float subsample, const pcl::PCLPointCloud2::Ptr& dst_blob) const;
 
 
     protected:
@@ -169,7 +169,7 @@ namespace osgpcl
   template<typename PointT>
   inline void osgpcl::OutofCoreOctreeT<PointT>::queryBBIncludes (
       const double min[3], const double max[3], size_t query_depth,
-      const sensor_msgs::PointCloud2::Ptr& dst_blob) const
+      const pcl::PCLPointCloud2::Ptr& dst_blob) const
   {
     octree_->queryBBIncludes(ConstVec3dMap(min), ConstVec3dMap(max), query_depth, dst_blob);
   }
@@ -177,9 +177,9 @@ namespace osgpcl
   template<typename PointT>
   inline void osgpcl::OutofCoreOctreeT<PointT>::queryBBIncludes_subsample (
       const double min[3], const double max[3], size_t query_depth,
-      float subsample, const sensor_msgs::PointCloud2::Ptr& dst_blob) const
+      float subsample, const pcl::PCLPointCloud2::Ptr& dst_blob) const
   {
-    sensor_msgs::PointCloud2::Ptr rblob(new sensor_msgs::PointCloud2);
+    pcl::PCLPointCloud2::Ptr rblob(new pcl::PCLPointCloud2);
     if (subsample>0.999) {
       std::cout << "Querying " << query_depth << " \n";
       octree_->queryBBIncludes(ConstVec3dMap(min), ConstVec3dMap(max), query_depth, dst_blob);
