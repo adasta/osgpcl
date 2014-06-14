@@ -125,7 +125,7 @@
      else{
        ss= stateset_;
      }
-     geom->setStateSet(stateset_);
+     geom->setStateSet(ss);
 
      return geom;
   }
