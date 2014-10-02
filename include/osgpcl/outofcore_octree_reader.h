@@ -154,7 +154,7 @@ namespace osgpcl
           bool isLeaf(){return isLeaf_;}
           void setLeaf(bool enable){isLeaf_=enable;}
           
-          void addCacheHint( const osgDB::Options::CacheHintOptions cho )
+          void addCacheHint( const osgDB::Options::CacheHintOptions cho );
       };
 
   };
