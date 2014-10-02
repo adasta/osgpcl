@@ -153,6 +153,8 @@ namespace osgpcl
           const osg::Vec3d& getBBmin(){return bbmin_;}
           bool isLeaf(){return isLeaf_;}
           void setLeaf(bool enable){isLeaf_=enable;}
+          
+          void addCacheHint( const osgDB::Options::CacheHintOptions cho );
       };
 
   };
