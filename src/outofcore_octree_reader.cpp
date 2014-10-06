@@ -213,7 +213,7 @@ namespace osgpcl
           CloudReaderOptions(factory, 1), isRoot_(true),depth_(0), max_depth_(0),
           depth_set_(false),  bbmin_(0,0,0),bbmax_(0,0,0), isLeaf_(false)
   {
-    this->init(octree_ );
+    this->init( _octree );
   }
 
   bool OutofCoreOctreeReader::OutOfCoreOptions::init (const OutOfCoreOctree::Ptr& _octree )
